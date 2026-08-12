@@ -20,6 +20,11 @@ This application is decision support only. It does not determine, confirm, deny,
 - a canonical structured event API (`POST /api/events`);
 - optional passwordless sign-in for a saved demonstration workspace;
 - a validated review API (`POST /api/reviews`) with durable signed-in receipts;
+- a professional review queue with renewal context, before/after exposure data,
+  policy/endorsement context, minimum evidence requests, and permitted actions;
+- append-only broker/insurer discussion activity (`GET/POST /api/review-activity`);
+- an insurer-neutral export contract plus clearly labelled future connector
+  capability register for Zurich eXchange, accounting, cloud, and documents;
 - tenant-scoped PostgreSQL persistence with Supabase Auth and row-level security;
 - a private evidence bucket for future PDF/document intake;
 - resettable, third-party-independent demo mode.
@@ -58,8 +63,10 @@ This runs formatting checks, lint, typecheck, unit/golden tests, production buil
 4. Open the source excerpts and Coverage Challenge result.
 5. Apply **Cloud dependency** and show `EVIDENCE_INCOMPLETE` abstention.
 6. Request professional review.
-7. Open Reports and download the assessment PDF.
-8. Open the audit trail and compare assessment versions.
+7. Open Review queue and inspect Exposure, Programme, Evidence requests,
+   Discussion, Audit, and Export.
+8. Open Reports and download the assessment PDF.
+9. Open the audit trail and compare assessment versions.
 
 ## Canonical event API
 
@@ -117,6 +124,21 @@ public demonstration. Supabase is used only by the optional signed-in workspace.
 ## AI boundary
 
 Replay mode loads previously validated structured extraction fixtures. A future live adapter must use the same Zod input/output contract, capped retries/timeouts, explicit tools, provenance requirements, run IDs, prompt/model versions, token/cost telemetry, and deterministic post-validation. An agent can never promote its own output into a confirmed finding.
+
+## Integration boundary
+
+The review workspace shows the data contracts that future connectors would use,
+but it does not pretend those integrations are active. Zurich eXchange mappings
+remain `ACCESS_REQUIRED`; Xero, QuickBooks Online, cloud inventory, Google Drive,
+and SharePoint remain `FUTURE`. No connector has credentials, submits a case,
+changes a policy, alters a cloud account, or writes to a source system. Approved
+integrations must normalize data through the canonical event/evidence schemas and
+remain read-only until a separately authorized human workflow permits an action.
+
+The future Zurich register is aligned to the official Zurich eXchange discovery
+catalogue for Policy, Exposure, Risk Engineering, Documents, and Submission APIs.
+It is a capability map only—not evidence of access, certification, partnership,
+or Zurich endorsement. See [Zurich eXchange API Discovery](https://exchange.zurich.com/en/apis).
 
 ## Branding
 

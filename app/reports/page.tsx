@@ -82,7 +82,17 @@ export default function ReportsPage() {
               <strong>{brand.reportTitle}</strong>
               <small>{demoCompanyName}</small>
             </div>
-            <span className="synthetic-watermark">SYNTHETIC</span>
+            <div className="report-document-meta">
+              <span className="synthetic-watermark">SYNTHETIC</span>
+              <strong>
+                {lens === "simple"
+                  ? "Simple"
+                  : lens === "insurance"
+                    ? "Insurance"
+                    : "Evidence"}{" "}
+                view
+              </strong>
+            </div>
           </header>
           <section>
             <p className="eyebrow">{reportCopy.summaryLabel}</p>
@@ -160,17 +170,24 @@ export default function ReportsPage() {
               : `Report ID report_${assessment.id} · Assessment v${assessment.version} · Ruleset ${assessment.rulesetVersion}`}
           </footer>
         </article>
-        <aside className="report-aside">
+        <aside
+          className="report-aside"
+          aria-label="Report details and receipts"
+        >
           <div className="sticky-card report-card">
-            <FileText size={22} />
-            <h2>Assessment v{assessment.version}</h2>
-            <p>
-              {lens === "simple"
-                ? "Built from the current demo documents and selected business changes."
-                : lens === "insurance"
-                  ? "Generated from the current synthetic exposure and programme-evidence snapshot."
-                  : "Generated from the versioned synthetic evidence and canonical-event snapshot."}
-            </p>
+            <div className="report-card-heading">
+              <FileText size={22} />
+              <div>
+                <h2>Assessment v{assessment.version}</h2>
+                <p>
+                  {lens === "simple"
+                    ? "Built from the current demo documents and selected business changes."
+                    : lens === "insurance"
+                      ? "Generated from the current synthetic exposure and programme-evidence snapshot."
+                      : "Generated from the versioned synthetic evidence and canonical-event snapshot."}
+                </p>
+              </div>
+            </div>
             <dl>
               <div>
                 <dt>Pages</dt>
@@ -193,45 +210,47 @@ export default function ReportsPage() {
               <Download size={16} /> Download PDF
             </a>
           </div>
-          <div className="receipt-panel">
-            <Fingerprint size={18} />
-            <div>
-              <strong>
-                {lens === "simple" ? "Report tracking" : "Assessment receipt"}
-              </strong>
-              <span>
-                {lens === "evidence"
-                  ? assessment.receiptHash
-                  : "Included with the PDF"}
-              </span>
+          <div className="report-receipt-grid">
+            <div className="receipt-panel">
+              <Fingerprint size={18} />
+              <div>
+                <strong>
+                  {lens === "simple" ? "Report tracking" : "Assessment receipt"}
+                </strong>
+                <span>
+                  {lens === "evidence"
+                    ? assessment.receiptHash
+                    : "Included with the PDF"}
+                </span>
+              </div>
             </div>
-          </div>
-          <div className="receipt-panel">
-            <FileCheck2 size={18} />
-            <div>
-              <strong>
-                {lens === "simple" ? "Information set" : "Evidence snapshot"}
-              </strong>
-              <span>
-                {lens === "evidence"
-                  ? assessment.evidenceSnapshotId
-                  : "Versioned and recorded"}
-              </span>
+            <div className="receipt-panel">
+              <FileCheck2 size={18} />
+              <div>
+                <strong>
+                  {lens === "simple" ? "Information set" : "Evidence snapshot"}
+                </strong>
+                <span>
+                  {lens === "evidence"
+                    ? assessment.evidenceSnapshotId
+                    : "Versioned and recorded"}
+                </span>
+              </div>
             </div>
-          </div>
-          <div className="receipt-panel">
-            <ShieldCheck size={18} />
-            <div>
-              <strong>
-                {lens === "simple" ? "Review status" : "Human review"}
-              </strong>
-              <span>
-                {assessment.findings.some(
-                  (finding) => finding.reviewStatus !== "OPEN",
-                )
-                  ? "In progress"
-                  : "Open / unassigned"}
-              </span>
+            <div className="receipt-panel">
+              <ShieldCheck size={18} />
+              <div>
+                <strong>
+                  {lens === "simple" ? "Review status" : "Human review"}
+                </strong>
+                <span>
+                  {assessment.findings.some(
+                    (finding) => finding.reviewStatus !== "OPEN",
+                  )
+                    ? "In progress"
+                    : "Open / unassigned"}
+                </span>
+              </div>
             </div>
           </div>
         </aside>

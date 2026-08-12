@@ -46,4 +46,36 @@ describe("tenant-scoped demo repositories", () => {
       ),
     ).rejects.toThrow(/tenant scope/i);
   });
+
+  it("creates an append-only review discussion receipt", async () => {
+    const receipt = await demoRepositories.reviewActivity.append(
+      { organizationId: DEMO_ORGANIZATION_ID },
+      {
+        organizationId: DEMO_ORGANIZATION_ID,
+        assessmentId: "assessment_v2",
+        caseId: "case_assessment_v2",
+        findingId: "finding_new_location",
+        eventIds: ["event_new_warehouse"],
+        activityType: "COMMENT_ADDED",
+        visibility: "PROFESSIONAL_ONLY",
+        message: "Review the supplied endorsement pack.",
+        author: {
+          displayName: "Demo broker",
+          role: "BROKER_RISK_ADVISOR",
+        },
+        idempotencyKey: "test-comment-location",
+      },
+      "2026-08-12T16:05:00.000Z",
+    );
+
+    expect(receipt).toMatchObject({
+      accepted: true,
+      persisted: false,
+      activity: {
+        caseId: "case_assessment_v2",
+        visibility: "PROFESSIONAL_ONLY",
+      },
+      auditEvent: { eventType: "REVIEW_COMMENT_ADDED" },
+    });
+  });
 });

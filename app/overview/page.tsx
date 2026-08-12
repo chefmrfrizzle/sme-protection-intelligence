@@ -19,7 +19,7 @@ import { ViewLens } from "@/components/view-lens";
 import { demoCompany } from "@/demo/company";
 
 export default function OverviewPage() {
-  const { assessment, eventIds, lens, applyEvent, reset } = useDemo();
+  const { assessment, eventIds, lens, applyEvent, reset, hydrated } = useDemo();
   const reviewCount = assessment.findings.filter(
     (finding) => finding.state !== "ALIGNED",
   ).length;
@@ -59,7 +59,12 @@ export default function OverviewPage() {
         actions={
           <div className="button-row page-control-row">
             <ViewLens />
-            <button className="button secondary" type="button" onClick={reset}>
+            <button
+              className="button secondary"
+              type="button"
+              onClick={reset}
+              disabled={!hydrated}
+            >
               <RotateCcw aria-hidden="true" size={16} /> Reset demo
             </button>
           </div>
@@ -148,6 +153,7 @@ export default function OverviewPage() {
             type="button"
             onClick={() => applyEvent("event_new_warehouse")}
             data-testid="trigger-warehouse"
+            disabled={!hydrated}
           >
             Reconcile change <ArrowRight aria-hidden="true" size={16} />
           </button>

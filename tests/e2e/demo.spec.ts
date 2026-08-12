@@ -69,12 +69,24 @@ test("reset-to-report storyline is deterministic and reviewable", async ({
   ).toBeVisible();
   await page.getByRole("link", { name: "Open review case" }).click();
   await expect(
-    page.getByRole("heading", { name: "Protection Review Case" }),
+    page.getByRole("heading", { name: "Protection review queue" }),
   ).toBeVisible();
-  await expect(page.getByText(/Mock adapter · Not connected/i)).toBeVisible();
   await expect(
-    page.getByText("READY FOR PROFESSIONAL REVIEW", { exact: true }),
+    page.getByText(/External adapters · Not connected/i),
   ).toBeVisible();
+  await expect(
+    page.getByText("Recorded renewal context", { exact: true }),
+  ).toBeVisible();
+  await page.getByRole("tab", { name: "Exposure" }).click();
+  await expect(page.getByRole("heading", { name: "Property" })).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "Business interruption" }),
+  ).toBeVisible();
+  await page.getByRole("tab", { name: "Export" }).click();
+  await expect(
+    page.getByText(/Future Zurich eXchange mapping preview/i),
+  ).toBeVisible();
+  await expect(page.getByText(/Nothing is sent to Zurich/i)).toBeVisible();
 
   await page.goto("/changes");
   const cloudCard = page
@@ -178,6 +190,82 @@ test("scenario selections are reversible and explanation view persists", async (
   );
 });
 
+test("professional actions use clear states and the dense pages stay readable", async ({
+  page,
+}) => {
+  await page.goto("/overview");
+  await page
+    .getByRole("main")
+    .getByRole("button", { name: "Reset demo" })
+    .click();
+  await page.getByTestId("trigger-warehouse").first().click();
+  await page.goto("/review-case");
+
+  await page.getByRole("button", { name: "Start review" }).click();
+  await expect(page.getByText("Professional review started.")).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "Review in progress" }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: "Start review" }),
+  ).toBeDisabled();
+
+  const rationale = page.getByLabel("Decision rationale");
+  await page.getByRole("button", { name: "Confirm for review" }).click();
+  await expect(
+    page.getByText("Add a short rationale before recording this decision."),
+  ).toBeVisible();
+  await rationale.fill("The supplied evidence supports professional review.");
+  await page.getByRole("button", { name: "Confirm for review" }).click();
+  await expect(
+    page.getByText("Finding confirmed for the professional workflow."),
+  ).toBeVisible();
+
+  await page.getByRole("button", { name: "Request evidence" }).click();
+  await expect(
+    page.getByText("Minimum evidence request recorded."),
+  ).toBeVisible();
+
+  await rationale.fill("A specialist should interpret the remaining wording.");
+  await page.getByRole("button", { name: "Escalate" }).click();
+  await expect(
+    page.getByText("Finding escalated to a specialist reviewer."),
+  ).toBeVisible();
+
+  const hasNoHorizontalOverflow = () =>
+    page.evaluate(
+      () =>
+        document.documentElement.scrollWidth <=
+        document.documentElement.clientWidth,
+    );
+  await expect(hasNoHorizontalOverflow()).resolves.toBe(true);
+
+  if ((page.viewportSize()?.width ?? 0) > 820) {
+    const renewalSummary = await page
+      .locator(".review-workspace-summary")
+      .boundingBox();
+    expect(renewalSummary?.width ?? 0).toBeGreaterThan(700);
+  }
+
+  await page.goto("/reports");
+  await expect(hasNoHorizontalOverflow()).resolves.toBe(true);
+  if ((page.viewportSize()?.width ?? 0) > 820) {
+    const reportPreview = await page.locator(".report-preview").boundingBox();
+    expect(reportPreview?.width ?? 0).toBeGreaterThan(760);
+  }
+
+  await page.goto("/audit");
+  await expect(hasNoHorizontalOverflow()).resolves.toBe(true);
+  if ((page.viewportSize()?.width ?? 0) > 820) {
+    await expect(page.locator(".audit-version-card")).toHaveCSS(
+      "position",
+      "static",
+    );
+    const auditTimeline = await page.locator(".audit-timeline").boundingBox();
+    expect(auditTimeline?.width ?? 0).toBeGreaterThan(760);
+  }
+});
+
 test("canonical event endpoint validates input without persisting it", async ({
   request,
 }) => {
@@ -224,6 +312,41 @@ test("review endpoint validates the tenant and active finding", async ({
     data: { ...payload, findingId: "finding_not_active" },
   });
   expect(rejected.status()).toBe(409);
+});
+
+test("review activity endpoint validates case scope and stays replayable", async ({
+  request,
+}) => {
+  const payload = {
+    organizationId: "org_pacific_components",
+    assessmentId: "assessment_v2",
+    caseId: "case_assessment_v2",
+    findingId: "finding_new_location",
+    eventIds: ["event_new_warehouse"],
+    activityType: "COMMENT_ADDED",
+    visibility: "PROFESSIONAL_ONLY",
+    message: "Please validate the current endorsement pack.",
+    author: { displayName: "Demo reviewer", role: "BROKER_RISK_ADVISOR" },
+    idempotencyKey: "e2e-comment-location",
+  };
+  const response = await request.post("/api/review-activity", {
+    data: payload,
+  });
+  expect(response.status()).toBe(201);
+  await expect(response.json()).resolves.toMatchObject({
+    accepted: true,
+    persisted: false,
+    storageMode: "DEMO_REPLAY",
+    activity: {
+      caseId: "case_assessment_v2",
+      visibility: "PROFESSIONAL_ONLY",
+    },
+  });
+
+  const rejected = await request.post("/api/review-activity", {
+    data: { ...payload, caseId: "case_assessment_v9" },
+  });
+  expect(rejected.status()).toBe(403);
 });
 
 test("public demo exposes optional sign-in without exposing a session", async ({

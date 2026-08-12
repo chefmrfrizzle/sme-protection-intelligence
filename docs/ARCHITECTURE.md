@@ -36,6 +36,19 @@ RLS is enabled on every application table and anonymous Data API access is
 revoked. Synthetic evidence files remain fixture-backed; a private object bucket
 is provisioned for the future upload path.
 
+## Professional review boundary
+
+`domain/professional-review/` converts a validated assessment into an
+insurer-neutral review workspace. It deterministically derives the queue,
+renewal context, evidence readiness, before/after exposure packet, minimum
+evidence requests, and permitted human actions. `app/api/review-activity` stores
+comments separately from decision state in an append-only tenant-scoped table.
+
+`domain/integration/connectors.ts` is a capability register, not connector code.
+Every Zurich eXchange entry is `ACCESS_REQUIRED`; accounting, cloud, and document
+sources are `FUTURE`. Live adapters must normalize records through the existing
+canonical event/evidence contracts and cannot directly determine a finding.
+
 ## Production target architecture
 
 The domain layer is storage-agnostic. A production implementation replaces the demo repository with tenant-scoped Postgres repositories and private object storage while preserving the same input/output schemas.
@@ -67,6 +80,7 @@ lib/supabase/            browser/server authentication clients
 db/                      repository contracts, adapters, and migrations
 domain/
   evidence/              completeness and provenance helpers
+  professional-review/   review queue, context, requests, and audit workspace
   reconciliation/        deterministic assessment pipeline
   rules/                 versioned thresholds and rule evaluator
   schemas.ts             canonical Zod schemas

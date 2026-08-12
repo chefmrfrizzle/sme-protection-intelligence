@@ -12,6 +12,8 @@ import type {
   ProtectionReviewCaseSchema,
   ProtectionStateSchema,
   ReviewCommandSchema,
+  ReviewActivityCommandSchema,
+  ReviewActivityReceiptSchema,
   ReviewReceiptSchema,
   ReviewStatusSchema,
   RuleTraceSchema,
@@ -36,6 +38,8 @@ export type AgentRun = z.infer<typeof AgentRunSchema>;
 export type ProtectionReviewCase = z.infer<typeof ProtectionReviewCaseSchema>;
 export type ReviewCommand = z.infer<typeof ReviewCommandSchema>;
 export type ReviewReceipt = z.infer<typeof ReviewReceiptSchema>;
+export type ReviewActivityCommand = z.infer<typeof ReviewActivityCommandSchema>;
+export type ReviewActivityReceipt = z.infer<typeof ReviewActivityReceiptSchema>;
 
 export type ExposureSnapshot = {
   locationIds: string[];

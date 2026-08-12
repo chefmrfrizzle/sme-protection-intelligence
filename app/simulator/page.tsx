@@ -21,8 +21,15 @@ import { demoEvents, eventPresentation } from "@/demo/events";
 const icons = [Factory, PackagePlus, Users, Cloud, Globe2];
 
 export default function SimulatorPage() {
-  const { assessment, eventIds, hasEvent, toggleEvent, applyAll, reset } =
-    useDemo();
+  const {
+    assessment,
+    eventIds,
+    hasEvent,
+    toggleEvent,
+    applyAll,
+    reset,
+    hydrated,
+  } = useDemo();
   return (
     <div className="page-stack">
       <PageHeader
@@ -39,10 +46,20 @@ export default function SimulatorPage() {
           </span>
         </div>
         <div className="simulator-actions">
-          <button className="button secondary" type="button" onClick={reset}>
+          <button
+            className="button secondary"
+            type="button"
+            onClick={reset}
+            disabled={!hydrated}
+          >
             <RotateCcw size={15} /> Reset
           </button>
-          <button className="button primary" type="button" onClick={applyAll}>
+          <button
+            className="button primary"
+            type="button"
+            onClick={applyAll}
+            disabled={!hydrated}
+          >
             <Play size={15} /> Run all
           </button>
         </div>
@@ -59,6 +76,7 @@ export default function SimulatorPage() {
               key={event.id}
               onClick={() => toggleEvent(event.id!)}
               aria-pressed={applied}
+              disabled={!hydrated}
               aria-label={`${applied ? "Remove" : "Add"} ${presentation.title} ${applied ? "from" : "to"} scenario`}
             >
               <span className="scenario-icon">

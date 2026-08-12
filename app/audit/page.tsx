@@ -51,40 +51,8 @@ export default function AuditPage() {
         </dl>
       </section>
       <div className="audit-layout">
-        <section className="audit-timeline">
-          {assessment.auditEvents.map((event, index) => (
-            <article key={event.id}>
-              <div className="audit-marker">
-                <span>
-                  {index === assessment.auditEvents.length - 1 ? (
-                    <CheckCircle2 size={15} />
-                  ) : (
-                    <History size={15} />
-                  )}
-                </span>
-                {index < assessment.auditEvents.length - 1 ? <i /> : null}
-              </div>
-              <div className="audit-event">
-                <div>
-                  <strong>{event.eventType.replaceAll("_", " ")}</strong>
-                  <time>
-                    {new Date(event.occurredAt).toLocaleString("en-SG", {
-                      dateStyle: "medium",
-                      timeStyle: "short",
-                      timeZone: "Asia/Singapore",
-                    })}{" "}
-                    SGT
-                  </time>
-                </div>
-                <p>{event.summary}</p>
-                <span>{event.actor}</span>
-                <code>{event.snapshotHash}</code>
-              </div>
-            </article>
-          ))}
-        </section>
         <aside className="audit-aside">
-          <div className="sticky-card">
+          <div className="sticky-card audit-version-card">
             <FileClock size={20} />
             <h3>Versioned conclusions</h3>
             <p>
@@ -131,6 +99,38 @@ export default function AuditPage() {
             </div>
           </div>
         </aside>
+        <section className="audit-timeline" aria-label="Assessment events">
+          {assessment.auditEvents.map((event, index) => (
+            <article key={event.id}>
+              <div className="audit-marker">
+                <span>
+                  {index === assessment.auditEvents.length - 1 ? (
+                    <CheckCircle2 size={15} />
+                  ) : (
+                    <History size={15} />
+                  )}
+                </span>
+                {index < assessment.auditEvents.length - 1 ? <i /> : null}
+              </div>
+              <div className="audit-event">
+                <div>
+                  <strong>{event.eventType.replaceAll("_", " ")}</strong>
+                  <time>
+                    {new Date(event.occurredAt).toLocaleString("en-SG", {
+                      dateStyle: "medium",
+                      timeStyle: "short",
+                      timeZone: "Asia/Singapore",
+                    })}{" "}
+                    SGT
+                  </time>
+                </div>
+                <p>{event.summary}</p>
+                <span>{event.actor}</span>
+                <code>{event.snapshotHash}</code>
+              </div>
+            </article>
+          ))}
+        </section>
       </div>
     </div>
   );

@@ -26,7 +26,7 @@ const primaryNavigation = [
   { href: "/changes", label: "Changes", icon: Activity },
   { href: "/protection", label: "Protection", icon: ShieldCheck },
   { href: "/evidence", label: "Evidence", icon: Files },
-  { href: "/review-case", label: "Review case", icon: ClipboardCheck },
+  { href: "/review-case", label: "Review queue", icon: ClipboardCheck },
   { href: "/reports", label: "Reports", icon: FileOutput },
 ] as const;
 

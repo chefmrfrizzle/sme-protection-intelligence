@@ -15,10 +15,15 @@
 - completed: tenant-scoped repositories, validated review endpoints, Supabase
   passwordless authentication, database-backed assessment/review/audit/report
   receipts, RLS, and a private evidence bucket;
+- completed: professional review queue, recorded renewal context, policy and
+  endorsement context, before/after exposure packet, minimum evidence requests,
+  append-only professional comments, decision rationale, audit receipt, and
+  insurer-neutral future-export preview;
 - next: approved member invitation and authenticated role-specific views;
 - next: signed evidence upload/download routes using the private bucket;
 - live bounded extraction adapter and evaluation telemetry;
 - comparison reports and richer graph audit view;
+- access-approved connector adapters behind the existing neutral contracts;
 - signed API event ingestion with idempotency.
 
 ## P2 - production programme

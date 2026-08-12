@@ -3,6 +3,8 @@ import type {
   AuditEvent,
   EvidenceArtifact,
   ReviewCommand,
+  ReviewActivityCommand,
+  ReviewActivityReceipt,
   ReviewReceipt,
 } from "@/domain/types";
 
@@ -48,6 +50,18 @@ export interface ReviewRepository {
   ): Promise<ReviewReceipt["review"][]>;
 }
 
+export interface ReviewActivityRepository {
+  append(
+    scope: TenantScope,
+    command: ReviewActivityCommand,
+    occurredAt: string,
+  ): Promise<ReviewActivityReceipt>;
+  list(
+    scope: TenantScope,
+    assessmentId: string,
+  ): Promise<ReviewActivityReceipt["activity"][]>;
+}
+
 export interface AuditRepository {
   append(
     scope: TenantScope,
@@ -76,6 +90,7 @@ export type ProtectionRepositories = {
   assessments: AssessmentRepository;
   evidence: EvidenceRepository;
   reviews: ReviewRepository;
+  reviewActivity: ReviewActivityRepository;
   audit: AuditRepository;
   reports: ReportRepository;
 };
