@@ -1975,26 +1975,39 @@ p {
   background: white;
 }
 .audit-aside {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) repeat(2, minmax(180px, 0.7fr));
+  align-items: start;
+  gap: 12px;
 }
 .audit-aside .sticky-card > svg {
-  margin-bottom: 12px;
+  margin-bottom: 8px;
   color: var(--accent);
 }
+.audit-layout {
+  grid-template-columns: minmax(0, 1fr);
+  gap: 18px;
+}
+.audit-version-card {
+  position: static;
+  min-width: 0;
+  box-shadow: none;
+}
 .version-list {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(72px, 1fr));
   margin-top: 8px;
   border-top: 1px solid var(--line);
 }
 .version-list div {
-  display: grid;
-  grid-template-columns: 32px 1fr auto;
-  align-items: center;
-  border-bottom: 1px solid var(--line);
-  padding: 8px 0;
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  border-right: 1px solid var(--line);
+  padding: 10px 9px 4px;
+}
+.version-list div:last-child {
+  border-right: 0;
 }
 .version-list span {
   font-weight: 700;
@@ -2009,6 +2022,8 @@ p {
 }
 .audit-principle {
   display: flex;
+  min-width: 0;
+  align-items: flex-start;
   gap: 10px;
   border: 1px solid var(--line);
   border-radius: 10px;
@@ -2033,7 +2048,10 @@ p {
 
 /* Reports */
 .report-layout {
-  grid-template-columns: minmax(0, 1fr) 290px;
+  grid-template-columns: minmax(0, 1fr);
+  width: min(100%, 1040px);
+  margin-inline: auto;
+  gap: 18px;
 }
 .report-preview {
   overflow: hidden;
@@ -2073,6 +2091,15 @@ p {
   color: #73b9ad;
   font-size: 8px;
   letter-spacing: 0.16em;
+}
+.report-document-meta {
+  align-items: flex-end;
+  text-align: right;
+}
+.report-document-meta strong {
+  color: #b3c3bf;
+  font-size: 9px;
+  font-weight: 600;
 }
 .report-preview > section {
   margin: 0 38px;
@@ -2177,19 +2204,59 @@ p {
   color: var(--muted);
   font-size: 8px;
 }
-.report-card > svg {
-  margin-bottom: 10px;
+.report-aside {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+  gap: 12px;
+}
+.report-card {
+  position: static;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 14px 20px;
+  padding: 18px 20px;
+  box-shadow: none;
+}
+.report-card-heading {
+  display: flex;
+  min-width: 0;
+  align-items: flex-start;
+  gap: 11px;
+}
+.report-card-heading > svg {
+  flex: 0 0 auto;
   color: var(--accent);
+}
+.report-card-heading > div {
+  min-width: 0;
 }
 .report-card h2 {
   margin-bottom: 2px;
 }
-.report-card > p {
+.report-card p {
+  margin: 0;
+  color: var(--muted);
   font-size: 10px;
+}
+.report-card dl {
+  grid-column: 1 / -1;
+  margin: 0;
+}
+.report-card .button {
+  grid-column: 2;
+  grid-row: 1;
+  width: auto;
+  white-space: nowrap;
+}
+.report-receipt-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 8px;
 }
 .receipt-panel {
   width: 100%;
-  margin-top: 9px;
+  margin-top: 0;
   border-radius: 10px;
   font-family: inherit;
   padding: 12px;
@@ -2517,55 +2584,75 @@ p {
 /* Professional review workspace */
 .review-workspace-summary {
   display: grid;
-  grid-template-columns: minmax(210px, 0.8fr) auto minmax(220px, 1fr);
-  align-items: center;
-  gap: 26px;
+  grid-template-columns: minmax(250px, 0.85fr) minmax(0, 1fr);
+  align-items: stretch;
+  gap: 18px 28px;
   border: 1px solid var(--line);
   border-radius: var(--radius);
   background: linear-gradient(125deg, white, #f1f8f5);
   padding: 22px 24px;
 }
 
-.review-workspace-summary > div:first-child {
-  display: grid;
-  grid-template-columns: auto 1fr;
-  align-items: baseline;
-  column-gap: 8px;
+.renewal-summary-primary {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
 .review-workspace-summary .eyebrow {
-  grid-column: 1 / -1;
-  margin-bottom: 2px;
+  margin-bottom: 7px;
 }
 
-.review-workspace-summary > div:first-child strong {
+.renewal-countdown {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.renewal-countdown strong {
   color: var(--accent-dark);
-  font-size: 1.8rem;
+  font-size: 2.25rem;
   line-height: 1;
 }
 
-.review-workspace-summary > div:first-child span,
-.review-workspace-summary > p {
+.renewal-countdown span {
+  color: var(--ink);
+  font-size: 12px;
+  font-weight: 650;
+}
+
+.renewal-summary-primary small,
+.renewal-context-note {
   color: var(--muted);
   font-size: 9.5px;
 }
 
-.review-workspace-summary > p {
+.renewal-summary-primary small {
+  margin-top: 6px;
+}
+
+.renewal-context-note {
+  grid-column: 1 / -1;
   margin: 0;
-  border-left: 1px solid var(--line);
-  padding-left: 22px;
+  border-top: 1px solid var(--line);
+  padding-top: 13px;
 }
 
 .review-workspace-summary dl {
   display: grid;
   grid-template-columns: repeat(3, minmax(78px, 1fr));
-  gap: 8px;
+  gap: 10px;
   margin: 0;
 }
 
 .review-workspace-summary dl div {
-  border-left: 1px solid var(--line);
-  padding-left: 13px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.72);
+  padding: 13px 15px;
 }
 
 .review-workspace-summary dt {
@@ -2577,6 +2664,13 @@ p {
   margin: 2px 0 0;
   font-size: 1.2rem;
   font-weight: 700;
+}
+
+.decision-rationale-help {
+  display: block;
+  margin: -3px 0 7px;
+  color: var(--muted);
+  font-size: 8.5px;
 }
 
 .professional-view-row {
@@ -3704,13 +3798,15 @@ p {
     position: static;
   }
   .review-workspace-summary {
-    grid-template-columns: minmax(180px, 0.7fr) minmax(0, 1fr);
-  }
-  .review-workspace-summary > p {
-    border-left: 0;
-    padding-left: 0;
+    grid-template-columns: minmax(220px, 0.75fr) minmax(0, 1fr);
   }
   .review-workspace-summary dl {
+    grid-column: auto;
+  }
+  .audit-aside {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .audit-version-card {
     grid-column: 1 / -1;
   }
   .professional-workspace {
@@ -3837,6 +3933,19 @@ p {
   .review-panel,
   .integration-card {
     position: static;
+  }
+  .audit-aside,
+  .report-aside {
+    grid-template-columns: 1fr;
+  }
+  .audit-version-card {
+    grid-column: auto;
+  }
+  .review-workspace-summary {
+    grid-template-columns: 1fr;
+  }
+  .review-workspace-summary dl {
+    grid-column: auto;
   }
   .profile-summary {
     grid-template-columns: auto 1fr;
@@ -4072,6 +4181,14 @@ p {
   }
   .report-evidence-grid {
     grid-template-columns: 1fr;
+  }
+  .report-card {
+    grid-template-columns: 1fr;
+  }
+  .report-card .button {
+    grid-column: auto;
+    grid-row: auto;
+    width: 100%;
   }
   .report-preview footer {
     padding-inline: 23px;

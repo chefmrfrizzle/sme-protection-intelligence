@@ -190,6 +190,82 @@ test("scenario selections are reversible and explanation view persists", async (
   );
 });
 
+test("professional actions use clear states and the dense pages stay readable", async ({
+  page,
+}) => {
+  await page.goto("/overview");
+  await page
+    .getByRole("main")
+    .getByRole("button", { name: "Reset demo" })
+    .click();
+  await page.getByTestId("trigger-warehouse").first().click();
+  await page.goto("/review-case");
+
+  await page.getByRole("button", { name: "Start review" }).click();
+  await expect(page.getByText("Professional review started.")).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "Review in progress" }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: "Start review" }),
+  ).toBeDisabled();
+
+  const rationale = page.getByLabel("Decision rationale");
+  await page.getByRole("button", { name: "Confirm for review" }).click();
+  await expect(
+    page.getByText("Add a short rationale before recording this decision."),
+  ).toBeVisible();
+  await rationale.fill("The supplied evidence supports professional review.");
+  await page.getByRole("button", { name: "Confirm for review" }).click();
+  await expect(
+    page.getByText("Finding confirmed for the professional workflow."),
+  ).toBeVisible();
+
+  await page.getByRole("button", { name: "Request evidence" }).click();
+  await expect(
+    page.getByText("Minimum evidence request recorded."),
+  ).toBeVisible();
+
+  await rationale.fill("A specialist should interpret the remaining wording.");
+  await page.getByRole("button", { name: "Escalate" }).click();
+  await expect(
+    page.getByText("Finding escalated to a specialist reviewer."),
+  ).toBeVisible();
+
+  const hasNoHorizontalOverflow = () =>
+    page.evaluate(
+      () =>
+        document.documentElement.scrollWidth <=
+        document.documentElement.clientWidth,
+    );
+  await expect(hasNoHorizontalOverflow()).resolves.toBe(true);
+
+  if ((page.viewportSize()?.width ?? 0) > 820) {
+    const renewalSummary = await page
+      .locator(".review-workspace-summary")
+      .boundingBox();
+    expect(renewalSummary?.width ?? 0).toBeGreaterThan(700);
+  }
+
+  await page.goto("/reports");
+  await expect(hasNoHorizontalOverflow()).resolves.toBe(true);
+  if ((page.viewportSize()?.width ?? 0) > 820) {
+    const reportPreview = await page.locator(".report-preview").boundingBox();
+    expect(reportPreview?.width ?? 0).toBeGreaterThan(760);
+  }
+
+  await page.goto("/audit");
+  await expect(hasNoHorizontalOverflow()).resolves.toBe(true);
+  if ((page.viewportSize()?.width ?? 0) > 820) {
+    await expect(page.locator(".audit-version-card")).toHaveCSS(
+      "position",
+      "static",
+    );
+    const auditTimeline = await page.locator(".audit-timeline").boundingBox();
+    expect(auditTimeline?.width ?? 0).toBeGreaterThan(760);
+  }
+});
+
 test("canonical event endpoint validates input without persisting it", async ({
   request,
 }) => {

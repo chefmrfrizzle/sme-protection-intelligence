@@ -80,7 +80,7 @@ const decisionActions: {
   {
     status: "CONFIRMED",
     label: "Confirm finding for workflow",
-    shortLabel: "Confirm finding",
+    shortLabel: "Confirm for review",
     needsRationale: true,
   },
   {
@@ -103,10 +103,44 @@ const decisionActions: {
   },
 ];
 
+const reviewStatusCopy: Record<
+  ReviewStatus,
+  { label: string; feedback: string }
+> = {
+  OPEN: { label: "Ready for review", feedback: "Review case reopened." },
+  REVIEWING: {
+    label: "Review in progress",
+    feedback: "Professional review started.",
+  },
+  CONFIRMED: {
+    label: "Confirmed for review",
+    feedback: "Finding confirmed for the professional workflow.",
+  },
+  DISMISSED: {
+    label: "Finding dismissed",
+    feedback: "Finding dismissed with the recorded rationale.",
+  },
+  MORE_EVIDENCE_REQUESTED: {
+    label: "Evidence requested",
+    feedback: "Minimum evidence request recorded.",
+  },
+  ESCALATED: {
+    label: "Escalated",
+    feedback: "Finding escalated to a specialist reviewer.",
+  },
+};
+
 function formatDate(value: string) {
   return new Date(value).toLocaleString("en-SG", {
     dateStyle: "medium",
     timeStyle: "short",
+    timeZone: "Asia/Singapore",
+  });
+}
+
+function formatPolicyDate(value: string) {
+  return new Date(value).toLocaleDateString("en-SG", {
+    dateStyle: "medium",
     timeZone: "Asia/Singapore",
   });
 }
@@ -193,7 +227,7 @@ export default function ReviewCasePage() {
     });
     setFeedback(
       accepted
-        ? `Review activity recorded as ${status.replaceAll("_", " ").toLowerCase()}.`
+        ? reviewStatusCopy[status].feedback
         : "The decision could not be validated. No state was changed.",
     );
     if (accepted) setRationale("");
@@ -233,10 +267,16 @@ export default function ReviewCasePage() {
       />
 
       <section className="review-workspace-summary">
-        <div>
+        <div className="renewal-summary-primary">
           <p className="eyebrow">Recorded renewal context</p>
-          <strong>{workspace.renewal.daysRemaining} days</strong>
-          <span>until the period end in the supplied synthetic schedule</span>
+          <div className="renewal-countdown">
+            <strong>{workspace.renewal.daysRemaining}</strong>
+            <span>days remaining</span>
+          </div>
+          <small>
+            Recorded period end ·{" "}
+            {formatPolicyDate(workspace.renewal.recordedPeriodEnd)}
+          </small>
         </div>
         <dl>
           <div>
@@ -258,7 +298,10 @@ export default function ReviewCasePage() {
             <dd>{workspace.evidenceRequests.length}</dd>
           </div>
         </dl>
-        <p>{workspace.renewal.description}</p>
+        <p className="renewal-context-note">
+          Based on the supplied synthetic schedule. This is a planning reminder,
+          not a statement that protection will expire.
+        </p>
       </section>
 
       <div className="professional-view-row">
@@ -323,7 +366,7 @@ export default function ReviewCasePage() {
                 <span>{item.domain.replaceAll("_", " ")}</span>
                 <small>
                   {item.evidenceReadiness.replaceAll("_", " ")} ·{" "}
-                  {item.reviewStatus.replaceAll("_", " ")}
+                  {reviewStatusCopy[item.reviewStatus].label}
                 </small>
                 <ChevronRight aria-hidden="true" size={16} />
               </button>
@@ -430,12 +473,17 @@ export default function ReviewCasePage() {
                 </div>
                 <aside className="decision-panel">
                   <p className="eyebrow">Human-owned decision</p>
-                  <h3>{selectedFinding.reviewStatus.replaceAll("_", " ")}</h3>
+                  <h3>
+                    {reviewStatusCopy[selectedFinding.reviewStatus].label}
+                  </h3>
                   <p>
                     Confirming a finding accepts it for the review workflow. It
                     does not confirm insurance coverage.
                   </p>
                   <label htmlFor="decision-rationale">Decision rationale</label>
+                  <small className="decision-rationale-help">
+                    Required to confirm, dismiss or escalate.
+                  </small>
                   <textarea
                     id="decision-rationale"
                     value={rationale}
@@ -453,7 +501,10 @@ export default function ReviewCasePage() {
                             ? "button primary full"
                             : "button secondary full"
                         }
-                        disabled={submitting !== null}
+                        disabled={
+                          submitting !== null ||
+                          selectedFinding.reviewStatus === action.status
+                        }
                         onClick={() =>
                           runDecision(action.status, action.needsRationale)
                         }
