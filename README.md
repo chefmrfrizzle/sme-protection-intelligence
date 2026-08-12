@@ -18,8 +18,10 @@ This application is decision support only. It does not determine, confirm, deny,
 - replayed validated AI extraction behind a typed agent harness;
 - downloadable professional PDF report and reproducible assessment receipt;
 - a canonical structured event API (`POST /api/events`);
-- a validated review API (`POST /api/reviews`) with append-only demo receipts;
-- tenant-scoped persistence contracts and a PostgreSQL/RLS target migration;
+- optional passwordless sign-in for a saved demonstration workspace;
+- a validated review API (`POST /api/reviews`) with durable signed-in receipts;
+- tenant-scoped PostgreSQL persistence with Supabase Auth and row-level security;
+- a private evidence bucket for future PDF/document intake;
 - resettable, third-party-independent demo mode.
 
 All company, person, policy, financial, asset, supplier, infrastructure, and document data is synthetic.
@@ -35,6 +37,10 @@ npm run dev
 ```
 
 Open `http://localhost:3000`. The demo itself needs no secrets or external services.
+
+The deployed site also has an optional **Sign in to save** flow. Signed-out users
+remain in deterministic replay mode. Signed-in users save assessment versions,
+reviews, audit events, and report receipts to the protected Singapore database.
 
 ## Quality gate
 
@@ -83,21 +89,30 @@ in [AGENTS.md](AGENTS.md).
 - `zod`: validated domain, event, agent, and API boundaries;
 - `lucide-react`: accessible interface icons;
 - `pdf-lib`: deterministic server-side PDF generation without a browser service;
+- `@supabase/supabase-js`, `@supabase/ssr`: passwordless sign-in and secure
+  server-session cookies;
+- `postgres`: small server-only PostgreSQL driver for transactional persistence;
+- `dotenv-cli`: loads ignored local environment values for migration scripts;
 - `vitest`: domain, schema, rules, challenge, and report tests;
 - `@playwright/test`: reset-to-report browser validation;
 - TypeScript and ESLint: static correctness and code-quality gates.
 
-No analytics, model, database, identity, storage, or connector dependency is required by the public demonstration.
+No analytics, model call, identity, or database session is required by the
+public demonstration. Supabase is used only by the optional signed-in workspace.
 
 ## Security and privacy boundary
 
 - Synthetic data only; no real SME or insurer information.
 - `.env*`, `.vercel`, secrets, tokens, private source documents, build output, and local reports are ignored.
-- The deployed demo stores scenario state only in the visitor's browser. Review
-  requests are validated server-side and return `persisted: false`; the report
-  route rebuilds the synthetic assessment server-side and records a demo-mode
-  generation receipt.
-- Real deployment requires authentication, PostgreSQL row-level security, signed private evidence access, encryption, retention/deletion workflows, queue isolation, role separation, monitoring, and independent security/privacy/legal review.
+- Signed-out scenario state stays in the visitor's browser; receipts explicitly
+  return `persisted: false` / `DEMO_REPLAY`.
+- Signed-in review and report actions use a server-verified Supabase identity,
+  tenant membership checks, append-only tables, and `POSTGRES` receipts.
+- Every application table has row-level security. Anonymous Data API reads are
+  revoked, and the evidence bucket is private.
+- This is still a synthetic prototype. Real SME data requires retention/deletion
+  workflows, monitoring, backups, role onboarding, signed document delivery, and
+  independent security/privacy/legal review.
 
 ## AI boundary
 

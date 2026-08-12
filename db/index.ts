@@ -1,11 +1,10 @@
-import type { ProtectionRepositories } from "./contracts";
+import type { ProtectionRepositories, TenantScope } from "./contracts";
 import { demoRepositories } from "./demo-repositories";
+import { postgresRepositories } from "./postgres-repositories";
 
-export function getRepositories(): ProtectionRepositories {
-  const mode = process.env.PERSISTENCE_MODE ?? "demo";
-  if (mode === "demo") return demoRepositories;
-
-  throw new Error(
-    "PERSISTENCE_MODE=postgres requires the authenticated PostgreSQL adapter before accepting real data.",
+export function getRepositories(scope?: TenantScope): ProtectionRepositories {
+  const durableAvailable = Boolean(
+    process.env.POSTGRES_URL && scope?.actorUserId,
   );
+  return durableAvailable ? postgresRepositories : demoRepositories;
 }

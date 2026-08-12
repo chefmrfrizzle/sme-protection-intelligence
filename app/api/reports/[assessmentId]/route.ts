@@ -4,6 +4,7 @@ import { ReviewStatusSchema } from "@/domain/schemas";
 import { buildAssessment } from "@/domain/reconciliation/engine";
 import { createAssessmentPdf, reportContentHash } from "@/domain/report/pdf";
 import { getRepositories } from "@/db";
+import { getVerifiedIdentity } from "@/lib/supabase/server";
 
 const querySchema = z.object({
   events: z.string().max(500).optional().default(""),
@@ -58,18 +59,22 @@ export async function GET(
   }
   const bytes = await createAssessmentPdf(assessment);
   const contentHash = reportContentHash(bytes);
-  const reportResult = await getRepositories().reports.append(
-    { organizationId: assessment.organizationId },
-    {
-      id: `report_${assessment.id}`,
-      organizationId: assessment.organizationId,
-      assessmentId: assessment.id,
-      generatedAt: new Date().toISOString(),
-      contentHash,
-      evidenceSnapshotId: assessment.evidenceSnapshotId,
-      rulesetVersion: assessment.rulesetVersion,
-    },
-  );
+  const identity = await getVerifiedIdentity();
+  const scope = {
+    organizationId: assessment.organizationId,
+    actorUserId: identity?.userId,
+  };
+  const repositories = getRepositories(scope);
+  if (identity) await repositories.assessments.append(scope, assessment);
+  const reportResult = await repositories.reports.append(scope, {
+    id: `report_${assessment.id}_${contentHash.slice(-12)}`,
+    organizationId: assessment.organizationId,
+    assessmentId: assessment.id,
+    generatedAt: new Date().toISOString(),
+    contentHash,
+    evidenceSnapshotId: assessment.evidenceSnapshotId,
+    rulesetVersion: assessment.rulesetVersion,
+  });
   return new Response(Buffer.from(bytes), {
     headers: {
       "Content-Type": "application/pdf",

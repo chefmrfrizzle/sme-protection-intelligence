@@ -12,12 +12,11 @@
 
 ## P1 - after the deterministic demo remains stable
 
-- tenant-scoped repository contracts, validated review endpoints, and the
-  PostgreSQL/RLS target schema are complete;
-- next: provision authenticated database-backed assessment versions and
-  multi-user reviews;
-- authenticated role-specific views;
-- signed evidence upload and private object storage;
+- completed: tenant-scoped repositories, validated review endpoints, Supabase
+  passwordless authentication, database-backed assessment/review/audit/report
+  receipts, RLS, and a private evidence bucket;
+- next: approved member invitation and authenticated role-specific views;
+- next: signed evidence upload/download routes using the private bucket;
 - live bounded extraction adapter and evaluation telemetry;
 - comparison reports and richer graph audit view;
 - signed API event ingestion with idempotency.

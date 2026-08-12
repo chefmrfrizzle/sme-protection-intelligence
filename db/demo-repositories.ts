@@ -76,6 +76,10 @@ export const demoRepositories: ProtectionRepositories = {
         receiptHash: demoHash({ review, auditEvent }),
       });
     },
+    async list(scope) {
+      assertDemoTenant(scope);
+      return [];
+    },
   },
   audit: {
     async append(scope, event) {

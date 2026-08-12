@@ -8,6 +8,7 @@ import type {
 
 export type TenantScope = {
   organizationId: string;
+  actorUserId?: string;
 };
 
 export type PersistenceResult<T> = {
@@ -41,6 +42,10 @@ export interface ReviewRepository {
     command: ReviewCommand,
     occurredAt: string,
   ): Promise<ReviewReceipt>;
+  list(
+    scope: TenantScope,
+    assessmentId: string,
+  ): Promise<ReviewReceipt["review"][]>;
 }
 
 export interface AuditRepository {

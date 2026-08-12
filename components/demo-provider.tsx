@@ -22,8 +22,8 @@ export type ExplanationLens = "simple" | "insurance" | "evidence";
 export type ReviewRecord = {
   status: ReviewStatus;
   at: string;
-  reviewer: "Demo SME user";
-  role: "SME_USER";
+  reviewer: string;
+  role: "SME_USER" | "BROKER_RISK_ADVISOR" | "INSURER_REVIEWER";
 };
 
 type StoredState = {
@@ -102,6 +102,48 @@ export function DemoProvider({ children }: { children: ReactNode }) {
       // The deterministic demo remains usable when browser storage is blocked.
     }
   }, [eventIds, reviews, lens, hydrated]);
+
+  useEffect(() => {
+    if (!hydrated) return;
+    const assessmentId = `assessment_v${eventIds.length + 1}`;
+    const controller = new AbortController();
+    const params = new URLSearchParams({
+      assessmentId,
+      events: eventIds.join(","),
+    });
+    fetch(`/api/reviews?${params}`, {
+      cache: "no-store",
+      signal: controller.signal,
+    })
+      .then((response) => (response.ok ? response.json() : null))
+      .then((payload) => {
+        if (!payload?.persisted || !Array.isArray(payload.reviews)) return;
+        setReviews((current) => {
+          const saved = Object.fromEntries(
+            payload.reviews.map(
+              (review: {
+                findingId: string;
+                status: ReviewStatus;
+                occurredAt: string;
+                reviewer: string;
+                role: ReviewRecord["role"];
+              }) => [
+                review.findingId,
+                {
+                  status: review.status,
+                  at: review.occurredAt,
+                  reviewer: review.reviewer,
+                  role: review.role,
+                },
+              ],
+            ),
+          );
+          return { ...current, ...saved };
+        });
+      })
+      .catch(() => undefined);
+    return () => controller.abort();
+  }, [eventIds, hydrated]);
 
   const applyEvent = useCallback((eventId: string) => {
     interactedBeforeHydration.current = true;

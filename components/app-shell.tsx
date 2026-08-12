@@ -19,6 +19,7 @@ import {
 import { useState, type ReactNode } from "react";
 import { brand } from "@/domain/brand";
 import { useDemo } from "./demo-provider";
+import { AccountControl } from "./account-control";
 
 const primaryNavigation = [
   { href: "/overview", label: "Overview", icon: LayoutDashboard },
@@ -92,6 +93,7 @@ function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
         ))}
       </nav>
       <div className="sidebar-foot">
+        <AccountControl />
         <div className="mode-row">
           <span className="mode-dot" /> Replay mode
         </div>

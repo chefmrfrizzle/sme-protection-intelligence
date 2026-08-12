@@ -1484,6 +1484,109 @@ p {
   font-size: 10px;
 }
 
+.form-success {
+  margin: 9px 0 0;
+  color: var(--accent-dark);
+  font-size: 12px;
+}
+
+.account-placeholder {
+  min-height: 36px;
+}
+
+.account-control,
+.account-signed-in {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 36px;
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  color: var(--ink-soft);
+  background: var(--paper);
+  font-size: 12px;
+  font-weight: 650;
+}
+
+.account-control:hover {
+  border-color: var(--line-strong);
+  color: var(--ink);
+}
+
+.account-signed-in {
+  justify-content: space-between;
+  color: var(--accent-dark);
+}
+
+.account-signed-in span,
+.account-signed-in button {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.account-signed-in button {
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  padding: 3px;
+}
+
+.auth-page {
+  min-height: calc(100vh - 96px);
+  display: grid;
+  place-items: center;
+  padding: 32px 0;
+}
+
+.sign-in-card {
+  width: min(100%, 480px);
+  display: grid;
+  gap: 16px;
+  padding: clamp(24px, 5vw, 40px);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: var(--paper);
+  box-shadow: var(--shadow);
+}
+
+.sign-in-card h1,
+.sign-in-card p {
+  margin: 0;
+}
+
+.sign-in-card label {
+  color: var(--ink-soft);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.sign-in-card input {
+  width: 100%;
+  border: 1px solid var(--line-strong);
+  border-radius: 9px;
+  padding: 12px 13px;
+  color: var(--ink);
+  background: var(--paper);
+}
+
+.sign-in-card input:focus-visible {
+  outline: 3px solid rgba(15, 118, 110, 0.16);
+  border-color: var(--accent);
+}
+
+.sign-in-icon {
+  width: 46px;
+  height: 46px;
+  display: grid;
+  place-items: center;
+  border-radius: 12px;
+  color: var(--accent-dark);
+  background: var(--accent-pale);
+}
+
 /* Evidence */
 .evidence-summary-grid {
   display: grid;

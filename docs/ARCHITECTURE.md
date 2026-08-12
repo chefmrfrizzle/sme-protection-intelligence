@@ -10,7 +10,10 @@
 Browser / SME user
   -> Next.js App Router UI
   -> Demo state controller (versioned local synthetic scenario)
+  -> Optional Supabase passwordless session
   -> Validated review API -> tenant-scoped repository boundary
+       -> signed out: deterministic replay repository
+       -> signed in: PostgreSQL append-only repository
   -> Domain services
        -> canonical event validation
        -> temporal exposure reducer
@@ -25,11 +28,13 @@ Browser / SME user
 
 The deployed demonstration does not require a database, a model call, or an external connector. Validated extraction results are replayed from the synthetic corpus. This avoids an unreliable live dependency while exercising the same typed downstream interfaces a live extraction adapter uses.
 
-Review and report actions now cross validated server boundaries. In demo mode
-the repository implementation returns explicit `DEMO_REPLAY` receipts with
-`persisted: false`; it never implies durable storage. The PostgreSQL target
-schema and row-level-security policies are defined but intentionally not
-activated before authentication and tenant authorization exist.
+Review and report actions cross validated server boundaries. Signed-out use
+returns explicit `DEMO_REPLAY` receipts with `persisted: false`. Signed-in use
+derives identity from verified Supabase claims, checks organization membership,
+and writes assessment versions, reviews, audit events, and reports to PostgreSQL.
+RLS is enabled on every application table and anonymous Data API access is
+revoked. Synthetic evidence files remain fixture-backed; a private object bucket
+is provisioned for the future upload path.
 
 ## Production target architecture
 
@@ -58,6 +63,8 @@ Recommended production controls:
 ```text
 app/                     routes, layouts, report and event APIs
 components/              presentation and interaction components
+lib/supabase/            browser/server authentication clients
+db/                      repository contracts, adapters, and migrations
 domain/
   evidence/              completeness and provenance helpers
   reconciliation/        deterministic assessment pipeline
@@ -102,6 +109,8 @@ Node IDs are stable and tenant-scoped. Every edge has `validFrom`, optional `val
 
 - "Continuously" does not mean autonomous unbounded polling. Production uses event-driven reconciliation; the demo uses deliberate events.
 - "Immutable" and "deletion capability" are reconciled by append-only decision history plus tenant data-erasure workflows. Erasure creates a tombstone audit event and removes protected content according to policy; it does not silently rewrite prior decisions.
-- A public demo cannot safely prove real multi-tenant isolation without an identity provider and database. The code keeps tenant IDs and repository boundaries explicit, but production authentication/RLS is a separate hardening milestone.
+- The signed-in synthetic workspace demonstrates identity and tenant isolation,
+  but real organizational onboarding and authorization administration remain a
+  production hardening milestone.
 - A live AI call is not required for the recorded demo. Replay mode contains previously validated structured results and exercises the same schemas and deterministic engine.
 - `Protection Alignment` is explanatory completeness/alignment, not underwriting, loss, pricing, or claim probability.

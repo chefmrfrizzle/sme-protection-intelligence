@@ -1,72 +1,80 @@
-# Backend setup boundary
+# Backend setup
 
-The public application currently runs with `PERSISTENCE_MODE=demo`. Review and
-report requests pass through validated server routes, receive append-only
-receipts, and explicitly return `persisted: false` / `DEMO_REPLAY`. The browser
-keeps the synthetic walkthrough state so the showcase remains deterministic.
+## Plain-English status
 
-Do not switch the application to real-data mode merely by adding a database
-URL. Authentication, tenant claims, private evidence storage, retention,
-regional processing, and access policies must be established first.
+The public demo works like a resettable practice account. It needs no login and
+does not save server records. A visitor who selects **Sign in to save** receives
+a passwordless email link. After sign-in, reviews, assessment snapshots, audit
+events, and report receipts survive refreshes and deployments.
 
-## Implemented now
+The connected Supabase project supplies three things in one free prototype
+service:
 
-- tenant-scoped repository contracts for assessments, evidence, reviews, audit
-  events, and reports;
-- deterministic demo repository with fail-closed tenant checks;
-- validated `POST /api/reviews` boundary with assessment/finding reconciliation;
-- report-generation receipt boundary and persistence-mode response header;
-- append-only PostgreSQL/RLS target migration in
-  `db/migrations/0001_protection_core.sql`;
-- no database credential, private URL, token, or real customer record in the
-  repository.
+1. Supabase Auth verifies the person using the saved workspace.
+2. PostgreSQL stores structured records.
+3. The private `evidence-private` bucket is reserved for future document uploads.
 
-## Production activation checklist
+No real SME data is stored. The production Site URL is the live Vercel auth
+callback. The database region is Singapore.
 
-1. Select the approved deployment region and managed PostgreSQL provider.
-2. Add authentication and map every session to an authorized
-   `organization_id` and role.
-3. Provision separate development, preview, and production databases.
-4. Store `DATABASE_URL` only as a server-side Vercel environment variable.
-5. Apply the migration using a dedicated migration role; the application role
-   must not own or bypass row-level security.
-6. Implement the PostgreSQL adapter behind `getRepositories()` and set the
-   tenant claim with a transaction-scoped `app.organization_id` value.
-7. Add private object storage for evidence and reports with short-lived signed
-   access; never expose storage credentials to the browser.
-8. Add idempotency, authorization, tenancy, retention/deletion, backup/restore,
-   and audit-integrity tests.
-9. Complete security, privacy, legal, vendor, and regulatory review before
-   accepting non-synthetic data.
-10. Only then set `PERSISTENCE_MODE=postgres` in an authenticated environment.
+## Current operating modes
 
-## Environment contract
+| Visitor    | Result                                                                          |
+| ---------- | ------------------------------------------------------------------------------- |
+| Signed out | Deterministic browser replay; receipts say `DEMO_REPLAY` and `persisted: false` |
+| Signed in  | Tenant-checked PostgreSQL writes; receipts say `POSTGRES` and `persisted: true` |
+
+The public demo is deliberately not locked behind a login so judges can use it
+immediately.
+
+## Setup and repair commands
+
+The Vercel project and Supabase resource must already be linked. Environment
+values live in `.env.local` and Vercel; they are ignored by Git.
+
+```bash
+vercel env pull .env.local --yes
+npm run db:migrate
+npm run storage:provision
+npm run quality
+```
+
+`db:migrate` is idempotent: it records each applied SQL file and skips it on the
+next run. `storage:provision` creates the private bucket only when missing.
+
+## Security model
+
+- Server routes verify Supabase JWT claims; they do not trust a browser-supplied
+  user or company membership.
+- The synthetic organization is the only tenant available in this showcase.
+- Every structured record includes `organization_id`.
+- Eight public-schema application tables have RLS enabled.
+- Anonymous and authenticated Data API table grants are revoked; validated
+  Next.js server routes own writes.
+- Review, audit, and assessment-version rows are append-only.
+- The service/secret key and database URLs are server-only.
+- Private evidence access has no public bucket URL.
+
+## Environment names
 
 ```text
-DEMO_MODE=true
-AI_MODE=replay
-PERSISTENCE_MODE=demo
-DATABASE_URL=
+NEXT_PUBLIC_SUPABASE_URL
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
+POSTGRES_URL
+POSTGRES_URL_NON_POOLING
+SUPABASE_URL
+SUPABASE_SECRET_KEY
 ```
 
-`DATABASE_URL` is intentionally blank in `.env.example`. Never prefix it with
-`NEXT_PUBLIC_`, commit a populated value, print it in logs, or share it in a
-client response.
+Only the URL and publishable key are intentionally browser-visible. A
+publishable key identifies the Supabase project; it does not bypass RLS. Never
+prefix database passwords, service-role keys, or secret keys with
+`NEXT_PUBLIC_`.
 
-## Review request contract
+## Before accepting real SME data
 
-`POST /api/reviews` accepts a tenant-scoped assessment/finding command, checks
-that the exact finding exists in the supplied deterministic event snapshot,
-and returns a receipt. In demo mode the receipt includes:
-
-```json
-{
-  "accepted": true,
-  "persisted": false,
-  "storageMode": "DEMO_REPLAY"
-}
-```
-
-The public UI updates its local synthetic state only after this server
-validation succeeds. A future PostgreSQL adapter must preserve the same
-response schema while returning `persisted: true` and `storageMode: POSTGRES`.
+This prototype is not ready for real insurance documents. First add approved
+member invitations and roles, signed upload/download routes, retention and
+deletion controls, backups and restore rehearsal, monitoring and alerting,
+separate preview/production data, rate limiting, and independent legal,
+privacy, security, and regulatory review.

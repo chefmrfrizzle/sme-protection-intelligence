@@ -13,3 +13,5 @@ test-results/
 .DS_Store
 output/
 tmp/
+.agents/
+skills-lock.json

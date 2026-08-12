@@ -1,6 +1,46 @@
 import { NextRequest } from "next/server";
 import { getRepositories } from "@/db";
 import { ReviewCommandSchema } from "@/domain/schemas";
+import { getVerifiedIdentity } from "@/lib/supabase/server";
+import { DEMO_ORGANIZATION_ID } from "@/demo/company";
+
+export async function GET(request: NextRequest) {
+  const assessmentId = request.nextUrl.searchParams.get("assessmentId") ?? "";
+  const eventIds = (request.nextUrl.searchParams.get("events") ?? "")
+    .split(",")
+    .filter(Boolean);
+  if (!/^assessment_v\d+$/.test(assessmentId) || eventIds.length > 25) {
+    return Response.json({ error: "Invalid review query" }, { status: 400 });
+  }
+  const identity = await getVerifiedIdentity();
+  if (!identity) {
+    return Response.json(
+      { persisted: false, storageMode: "DEMO_REPLAY", reviews: [] },
+      { headers: { "Cache-Control": "private, no-store" } },
+    );
+  }
+  const scope = {
+    organizationId: DEMO_ORGANIZATION_ID,
+    actorUserId: identity.userId,
+  };
+  const repositories = getRepositories(scope);
+  const assessment = await repositories.assessments.getById(
+    scope,
+    assessmentId,
+    eventIds,
+  );
+  if (!assessment) {
+    return Response.json(
+      { error: "Assessment snapshot mismatch" },
+      { status: 409 },
+    );
+  }
+  const reviews = await repositories.reviews.list(scope, assessmentId);
+  return Response.json(
+    { persisted: true, storageMode: "POSTGRES", reviews },
+    { headers: { "Cache-Control": "private, no-store" } },
+  );
+}
 
 export async function POST(request: NextRequest) {
   const contentLength = Number(request.headers.get("content-length") ?? "0");
@@ -26,8 +66,12 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const repositories = getRepositories();
-  const scope = { organizationId: parsed.data.organizationId };
+  const identity = await getVerifiedIdentity();
+  const scope = {
+    organizationId: DEMO_ORGANIZATION_ID,
+    actorUserId: identity?.userId,
+  };
+  const repositories = getRepositories(scope);
   let assessment;
   try {
     assessment = await repositories.assessments.getById(
@@ -44,6 +88,12 @@ export async function POST(request: NextRequest) {
       { status: 409 },
     );
   }
+  if (parsed.data.organizationId !== assessment.organizationId) {
+    return Response.json(
+      { error: "Organization scope is invalid" },
+      { status: 403 },
+    );
+  }
   if (
     !assessment.findings.some((finding) => finding.id === parsed.data.findingId)
   ) {
@@ -53,9 +103,19 @@ export async function POST(request: NextRequest) {
     );
   }
 
+  if (identity) await repositories.assessments.append(scope, assessment);
+  const trustedCommand = identity
+    ? {
+        ...parsed.data,
+        reviewer: {
+          displayName: identity.email ?? "Signed-in reviewer",
+          role: "SME_USER" as const,
+        },
+      }
+    : parsed.data;
   const receipt = await repositories.reviews.append(
     scope,
-    parsed.data,
+    trustedCommand,
     new Date().toISOString(),
   );
   return Response.json(receipt, {

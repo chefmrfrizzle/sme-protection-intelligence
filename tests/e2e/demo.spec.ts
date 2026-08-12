@@ -225,3 +225,22 @@ test("review endpoint validates the tenant and active finding", async ({
   });
   expect(rejected.status()).toBe(409);
 });
+
+test("public demo exposes optional sign-in without exposing a session", async ({
+  page,
+  request,
+}) => {
+  const session = await request.get("/api/auth/session");
+  expect(session.status()).toBe(200);
+  await expect(session.json()).resolves.toEqual({ authenticated: false });
+
+  await page.goto("/sign-in");
+  await expect(
+    page.getByRole("heading", { name: "Sign in to save review activity" }),
+  ).toBeVisible();
+  await expect(page.getByLabel("Email address")).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: "Email me a sign-in link" }),
+  ).toBeVisible();
+  await expect(page.getByText("No password is stored")).toBeVisible();
+});
