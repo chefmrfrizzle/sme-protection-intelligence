@@ -18,6 +18,12 @@ import { evidenceArtifacts } from "@/demo/evidence";
 import { demoEvents, eventPresentation } from "@/demo/events";
 import { buildProtectionReviewCase } from "@/domain/integration/review-case";
 
+const actionLabels = {
+  ROUTE_FOR_REVIEW: "Send for professional review",
+  REQUEST_EVIDENCE: "Request supporting documents",
+  ABSTAIN: "Leave unresolved — insufficient evidence",
+} as const;
+
 export default function ReviewCasePage() {
   const { assessment } = useDemo();
   const reviewCase = buildProtectionReviewCase(
@@ -232,10 +238,13 @@ export default function ReviewCasePage() {
             <strong>Permitted system actions</strong>
             {reviewCase.allowedActions.map((action) => (
               <span key={action}>
-                <CheckCircle2 size={13} /> {action.replaceAll("_", " ")}
+                <CheckCircle2 size={13} /> {actionLabels[action]}
               </span>
             ))}
-            <small>No price, bind, coverage, or claim decision.</small>
+            <small>
+              “Leave unresolved” is recorded as ABSTAIN in the structured audit
+              contract. No price, bind, coverage, or claim decision is allowed.
+            </small>
           </section>
         </aside>
       </div>

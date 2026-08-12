@@ -20,6 +20,35 @@ export default function ReportsPage() {
     .map(([findingId, review]) => `${findingId}:${review.status}`)
     .join(",");
   const reportUrl = `/api/reports/${assessment.id}?events=${encodeURIComponent(eventIds.join(","))}&reviews=${encodeURIComponent(reviewQuery)}`;
+  const reportCopy = {
+    simple: {
+      summaryLabel: "At a glance",
+      summaryTitle: `${assessment.appliedEventIds.length} business changes reviewed`,
+      summary:
+        assessment.findings.length > 0
+          ? `${assessment.findings.length} ${assessment.findings.length === 1 ? "item needs" : "items need"} attention. The report explains what changed, why it matters and what to do next.`
+          : "The information supplied matches the evaluated baseline areas. No selected change currently needs review.",
+      domainLabel: "Areas checked",
+      findingLabel: "What needs attention",
+    },
+    insurance: {
+      summaryLabel: "Executive summary",
+      summaryTitle: `${assessment.appliedEventIds.length} material exposure changes assessed`,
+      summary:
+        assessment.findings.length > 0
+          ? `${assessment.findings.length} review items were produced across the supplied programme evidence. Uncertainty is preserved where evidence is incomplete or policy interpretation is required.`
+          : "Available evidence supports current protection alignment for the evaluated baseline scope.",
+      domainLabel: "Protection state register",
+      findingLabel: "Material findings",
+    },
+    evidence: {
+      summaryLabel: "Reproducibility summary",
+      summaryTitle: `Assessment v${assessment.version} is source-linked and versioned`,
+      summary: `${assessment.findings.length} review items were generated from evidence snapshot ${assessment.evidenceSnapshotId} using ruleset ${assessment.rulesetVersion}.`,
+      domainLabel: "Evidence and audit basis",
+      findingLabel: "Finding provenance",
+    },
+  }[lens];
   return (
     <div className="page-stack">
       <PageHeader
@@ -56,36 +85,53 @@ export default function ReportsPage() {
             <span className="synthetic-watermark">SYNTHETIC</span>
           </header>
           <section>
-            <p className="eyebrow">Executive Summary</p>
-            <h2>
-              {assessment.appliedEventIds.length} material changes assessed
-            </h2>
-            <p>
-              {assessment.findings.length
-                ? `${assessment.findings.length} items require attention across the supplied evidence. The system preserved uncertainty where current evidence was insufficient or required professional interpretation.`
-                : "Available evidence supports current protection alignment for the evaluated baseline scope."}
-            </p>
+            <p className="eyebrow">{reportCopy.summaryLabel}</p>
+            <h2>{reportCopy.summaryTitle}</h2>
+            <p>{reportCopy.summary}</p>
             <div className="report-alignment">
               <strong>{assessment.alignment}%</strong>
-              <span>evidence-aligned</span>
+              <span>
+                {lens === "simple" ? "information aligned" : "evidence-aligned"}
+              </span>
               <i>
                 <b style={{ width: `${assessment.alignment}%` }} />
               </i>
             </div>
           </section>
           <section>
-            <p className="eyebrow">Current protection alignment</p>
-            <div className="report-domain-list">
-              {assessment.domains.map((domain) => (
-                <div key={domain.domain}>
-                  <strong>{domain.domain.replaceAll("_", " ")}</strong>
-                  <StatusBadge state={domain.state} compact />
+            <p className="eyebrow">{reportCopy.domainLabel}</p>
+            {lens === "evidence" ? (
+              <div className="report-evidence-grid">
+                <div>
+                  <span>Evidence snapshot</span>
+                  <strong>{assessment.evidenceSnapshotId}</strong>
                 </div>
-              ))}
-            </div>
+                <div>
+                  <span>Ruleset</span>
+                  <strong>{assessment.rulesetVersion}</strong>
+                </div>
+                <div>
+                  <span>Assessment receipt</span>
+                  <strong>{assessment.receiptHash}</strong>
+                </div>
+                <div>
+                  <span>Audit events</span>
+                  <strong>{assessment.auditEvents.length}</strong>
+                </div>
+              </div>
+            ) : (
+              <div className="report-domain-list">
+                {assessment.domains.map((domain) => (
+                  <div key={domain.domain}>
+                    <strong>{domain.domain.replaceAll("_", " ")}</strong>
+                    <StatusBadge state={domain.state} compact />
+                  </div>
+                ))}
+              </div>
+            )}
           </section>
           <section>
-            <p className="eyebrow">Material findings</p>
+            <p className="eyebrow">{reportCopy.findingLabel}</p>
             {assessment.findings.length ? (
               assessment.findings.slice(0, 3).map((finding) => (
                 <div className="mini-finding" key={finding.id}>
@@ -95,7 +141,7 @@ export default function ReportsPage() {
                       ? finding.simpleExplanation
                       : lens === "insurance"
                         ? finding.insuranceExplanation
-                        : `${finding.evidenceIds.length} linked artifacts · ${finding.ruleTrace.ruleId} v${finding.ruleTrace.ruleVersion}`}
+                        : `${finding.evidenceIds.length} linked artifacts · ${finding.ruleTrace.ruleId} v${finding.ruleTrace.ruleVersion} · Challenge ${finding.challenge.outcome.replaceAll("_", " ")}`}
                   </span>
                 </div>
               ))
@@ -109,8 +155,9 @@ export default function ReportsPage() {
             )}
           </section>
           <footer>
-            Report ID report_{assessment.id} · Assessment v{assessment.version}{" "}
-            · Ruleset {assessment.rulesetVersion}
+            {lens === "simple"
+              ? `Report for ${demoCompanyName} · Assessment v${assessment.version}`
+              : `Report ID report_${assessment.id} · Assessment v${assessment.version} · Ruleset ${assessment.rulesetVersion}`}
           </footer>
         </article>
         <aside className="report-aside">

@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useParams } from "next/navigation";
+import { useState } from "react";
 import {
   ArrowLeft,
   ArrowRight,
@@ -21,7 +22,11 @@ import { minimumEvidenceRequest } from "@/domain/evidence/completeness";
 
 export default function FindingDetailPage() {
   const params = useParams<{ id: string }>();
-  const { assessment, lens, updateReview } = useDemo();
+  const { assessment, lens, submitReview } = useDemo();
+  const [submitting, setSubmitting] = useState<"review" | "evidence" | null>(
+    null,
+  );
+  const [submissionError, setSubmissionError] = useState(false);
   const finding = assessment.findings.find((item) => item.id === params.id);
 
   if (!finding) {
@@ -43,6 +48,16 @@ export default function FindingDetailPage() {
     .map((id) => evidenceById.get(id))
     .filter((item): item is NonNullable<typeof item> => Boolean(item));
   const request = minimumEvidenceRequest(finding);
+  const sendReviewAction = async (
+    action: "review" | "evidence",
+    status: "REVIEWING" | "MORE_EVIDENCE_REQUESTED",
+  ) => {
+    setSubmitting(action);
+    setSubmissionError(false);
+    const accepted = await submitReview(finding.id, status);
+    setSubmissionError(!accepted);
+    setSubmitting(null);
+  };
 
   return (
     <div className="page-stack finding-page">
@@ -262,18 +277,28 @@ export default function FindingDetailPage() {
           <button
             className="button primary full"
             type="button"
-            onClick={() => updateReview(finding.id, "REVIEWING")}
+            onClick={() => sendReviewAction("review", "REVIEWING")}
             data-testid="request-review"
+            disabled={submitting !== null}
           >
-            <Send size={16} /> Request review
+            <Send size={16} />
+            {submitting === "review" ? "Sending…" : "Request review"}
           </button>
           <button
             className="button secondary full"
             type="button"
-            onClick={() => updateReview(finding.id, "MORE_EVIDENCE_REQUESTED")}
+            onClick={() =>
+              sendReviewAction("evidence", "MORE_EVIDENCE_REQUESTED")
+            }
+            disabled={submitting !== null}
           >
-            Request documents
+            {submitting === "evidence" ? "Sending…" : "Request documents"}
           </button>
+          {submissionError ? (
+            <p className="form-error" role="alert">
+              The review request could not be validated. Please try again.
+            </p>
+          ) : null}
           <Link className="button secondary full" href="/review-case">
             <FileCheck2 size={16} /> Open review case
           </Link>

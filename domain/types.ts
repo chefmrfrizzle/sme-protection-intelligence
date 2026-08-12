@@ -11,6 +11,8 @@ import type {
   ProtectionDomainSchema,
   ProtectionReviewCaseSchema,
   ProtectionStateSchema,
+  ReviewCommandSchema,
+  ReviewReceiptSchema,
   ReviewStatusSchema,
   RuleTraceSchema,
   SourceReferenceSchema,
@@ -32,6 +34,8 @@ export type AuditEvent = z.infer<typeof AuditEventSchema>;
 export type Assessment = z.infer<typeof AssessmentSchema>;
 export type AgentRun = z.infer<typeof AgentRunSchema>;
 export type ProtectionReviewCase = z.infer<typeof ProtectionReviewCaseSchema>;
+export type ReviewCommand = z.infer<typeof ReviewCommandSchema>;
+export type ReviewReceipt = z.infer<typeof ReviewReceiptSchema>;
 
 export type ExposureSnapshot = {
   locationIds: string[];

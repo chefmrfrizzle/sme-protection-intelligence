@@ -18,6 +18,8 @@ This application is decision support only. It does not determine, confirm, deny,
 - replayed validated AI extraction behind a typed agent harness;
 - downloadable professional PDF report and reproducible assessment receipt;
 - a canonical structured event API (`POST /api/events`);
+- a validated review API (`POST /api/reviews`) with append-only demo receipts;
+- tenant-scoped persistence contracts and a PostgreSQL/RLS target migration;
 - resettable, third-party-independent demo mode.
 
 All company, person, policy, financial, asset, supplier, infrastructure, and document data is synthetic.
@@ -70,7 +72,10 @@ This runs formatting checks, lint, typecheck, unit/golden tests, production buil
 
 ## Repository map
 
-See [Architecture](docs/ARCHITECTURE.md), [Algorithms](docs/ALGORITHMS.md), and [Implementation Plan](docs/IMPLEMENTATION_PLAN.md). Engineering and safety constraints are in [AGENTS.md](AGENTS.md).
+See [Architecture](docs/ARCHITECTURE.md), [Algorithms](docs/ALGORITHMS.md),
+[Implementation Plan](docs/IMPLEMENTATION_PLAN.md), and
+[Backend Setup](docs/BACKEND_SETUP.md). Engineering and safety constraints are
+in [AGENTS.md](AGENTS.md).
 
 ## Dependencies and why they exist
 
@@ -88,7 +93,10 @@ No analytics, model, database, identity, storage, or connector dependency is req
 
 - Synthetic data only; no real SME or insurer information.
 - `.env*`, `.vercel`, secrets, tokens, private source documents, build output, and local reports are ignored.
-- The deployed demo stores scenario state only in the visitor's browser. The report route receives validated event IDs and rebuilds the synthetic assessment server-side.
+- The deployed demo stores scenario state only in the visitor's browser. Review
+  requests are validated server-side and return `persisted: false`; the report
+  route rebuilds the synthetic assessment server-side and records a demo-mode
+  generation receipt.
 - Real deployment requires authentication, PostgreSQL row-level security, signed private evidence access, encryption, retention/deletion workflows, queue isolation, role separation, monitoring, and independent security/privacy/legal review.
 
 ## AI boundary

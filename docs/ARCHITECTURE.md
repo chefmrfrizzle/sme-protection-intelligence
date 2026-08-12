@@ -10,6 +10,7 @@
 Browser / SME user
   -> Next.js App Router UI
   -> Demo state controller (versioned local synthetic scenario)
+  -> Validated review API -> tenant-scoped repository boundary
   -> Domain services
        -> canonical event validation
        -> temporal exposure reducer
@@ -23,6 +24,12 @@ Browser / SME user
 ```
 
 The deployed demonstration does not require a database, a model call, or an external connector. Validated extraction results are replayed from the synthetic corpus. This avoids an unreliable live dependency while exercising the same typed downstream interfaces a live extraction adapter uses.
+
+Review and report actions now cross validated server boundaries. In demo mode
+the repository implementation returns explicit `DEMO_REPLAY` receipts with
+`persisted: false`; it never implies durable storage. The PostgreSQL target
+schema and row-level-security policies are defined but intentionally not
+activated before authentication and tenant authorization exist.
 
 ## Production target architecture
 

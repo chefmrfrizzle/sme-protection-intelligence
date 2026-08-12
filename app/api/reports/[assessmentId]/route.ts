@@ -3,6 +3,7 @@ import { z } from "zod";
 import { ReviewStatusSchema } from "@/domain/schemas";
 import { buildAssessment } from "@/domain/reconciliation/engine";
 import { createAssessmentPdf, reportContentHash } from "@/domain/report/pdf";
+import { getRepositories } from "@/db";
 
 const querySchema = z.object({
   events: z.string().max(500).optional().default(""),
@@ -57,12 +58,25 @@ export async function GET(
   }
   const bytes = await createAssessmentPdf(assessment);
   const contentHash = reportContentHash(bytes);
+  const reportResult = await getRepositories().reports.append(
+    { organizationId: assessment.organizationId },
+    {
+      id: `report_${assessment.id}`,
+      organizationId: assessment.organizationId,
+      assessmentId: assessment.id,
+      generatedAt: new Date().toISOString(),
+      contentHash,
+      evidenceSnapshotId: assessment.evidenceSnapshotId,
+      rulesetVersion: assessment.rulesetVersion,
+    },
+  );
   return new Response(Buffer.from(bytes), {
     headers: {
       "Content-Type": "application/pdf",
       "Content-Disposition": `attachment; filename="PRODUCT_Protection_Alignment_${assessment.id}.pdf"`,
       "Cache-Control": "private, no-store",
       "X-Assessment-Content-Hash": contentHash,
+      "X-Persistence-Mode": reportResult.storageMode,
     },
   });
 }

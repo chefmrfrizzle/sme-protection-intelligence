@@ -26,6 +26,20 @@ export const ReviewStatusSchema = z.enum([
   "ESCALATED",
 ]);
 
+export const ReviewCommandSchema = z.object({
+  organizationId: z.string().min(1),
+  assessmentId: z.string().regex(/^assessment_v\d+$/),
+  findingId: z.string().min(1),
+  eventIds: z.array(z.string().min(1)).max(25),
+  status: ReviewStatusSchema,
+  reviewer: z.object({
+    displayName: z.string().min(1).max(120),
+    role: z.enum(["SME_USER", "BROKER_RISK_ADVISOR", "INSURER_REVIEWER"]),
+  }),
+  rationale: z.string().max(1_000).optional(),
+  idempotencyKey: z.string().min(8).max(160),
+});
+
 export const SourceReferenceSchema = z.object({
   documentId: z.string().min(1),
   fileName: z.string().min(1),
@@ -173,6 +187,26 @@ export const AuditEventSchema = z.object({
   occurredAt: z.string().datetime(),
   summary: z.string().min(1),
   snapshotHash: z.string().min(8),
+});
+
+export const ReviewReceiptSchema = z.object({
+  accepted: z.literal(true),
+  persisted: z.boolean(),
+  storageMode: z.enum(["DEMO_REPLAY", "POSTGRES"]),
+  review: z.object({
+    id: z.string().min(1),
+    organizationId: z.string().min(1),
+    assessmentId: z.string().min(1),
+    findingId: z.string().min(1),
+    status: ReviewStatusSchema,
+    reviewer: z.string().min(1),
+    role: z.enum(["SME_USER", "BROKER_RISK_ADVISOR", "INSURER_REVIEWER"]),
+    rationale: z.string().optional(),
+    occurredAt: z.string().datetime(),
+    idempotencyKey: z.string().min(8),
+  }),
+  auditEvent: AuditEventSchema,
+  receiptHash: z.string().min(8),
 });
 
 export const AssessmentSchema = z.object({

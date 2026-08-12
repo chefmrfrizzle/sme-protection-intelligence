@@ -159,6 +159,14 @@ test("scenario selections are reversible and explanation view persists", async (
     "true",
   );
 
+  await page.goto("/reports");
+  await expect(
+    page.getByText(/material exposure changes assessed/i),
+  ).toBeVisible();
+  await page.getByRole("tab", { name: "Evidence" }).click();
+  await expect(page.getByText(/source-linked and versioned/i)).toBeVisible();
+  await expect(page.getByText("Evidence and audit basis")).toBeVisible();
+
   await page.goto("/changes");
   await page
     .getByRole("main")
@@ -189,4 +197,31 @@ test("canonical event endpoint validates input without persisting it", async ({
     persisted: false,
     demoMode: true,
   });
+});
+
+test("review endpoint validates the tenant and active finding", async ({
+  request,
+}) => {
+  const payload = {
+    organizationId: "org_pacific_components",
+    assessmentId: "assessment_v2",
+    findingId: "finding_new_location",
+    eventIds: ["event_new_warehouse"],
+    status: "REVIEWING",
+    reviewer: { displayName: "Demo SME user", role: "SME_USER" },
+    idempotencyKey: "e2e-review-location",
+  };
+  const response = await request.post("/api/reviews", { data: payload });
+  expect(response.status()).toBe(201);
+  await expect(response.json()).resolves.toMatchObject({
+    accepted: true,
+    persisted: false,
+    storageMode: "DEMO_REPLAY",
+    review: { findingId: "finding_new_location", status: "REVIEWING" },
+  });
+
+  const rejected = await request.post("/api/reviews", {
+    data: { ...payload, findingId: "finding_not_active" },
+  });
+  expect(rejected.status()).toBe(409);
 });

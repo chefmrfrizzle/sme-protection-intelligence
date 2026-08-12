@@ -12,7 +12,10 @@
 
 ## P1 - after the deterministic demo remains stable
 
-- database-backed assessment versions and multi-user reviews;
+- tenant-scoped repository contracts, validated review endpoints, and the
+  PostgreSQL/RLS target schema are complete;
+- next: provision authenticated database-backed assessment versions and
+  multi-user reviews;
 - authenticated role-specific views;
 - signed evidence upload and private object storage;
 - live bounded extraction adapter and evaluation telemetry;

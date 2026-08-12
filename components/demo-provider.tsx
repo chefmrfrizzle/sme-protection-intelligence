@@ -43,6 +43,7 @@ type DemoContextValue = {
   reset: () => void;
   setLens: (lens: ExplanationLens) => void;
   updateReview: (findingId: string, status: ReviewStatus) => void;
+  submitReview: (findingId: string, status: ReviewStatus) => Promise<boolean>;
   hasEvent: (eventId: string) => boolean;
   hydrated: boolean;
 };
@@ -176,6 +177,35 @@ export function DemoProvider({ children }: { children: ReactNode }) {
     };
   }, [eventIds, reviews]);
 
+  const submitReview = useCallback(
+    async (findingId: string, status: ReviewStatus) => {
+      try {
+        const response = await fetch("/api/reviews", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            organizationId: assessment.organizationId,
+            assessmentId: assessment.id,
+            findingId,
+            eventIds,
+            status,
+            reviewer: {
+              displayName: "Demo SME user",
+              role: "SME_USER",
+            },
+            idempotencyKey: `demo:${assessment.id}:${findingId}:${status}`,
+          }),
+        });
+        if (!response.ok) return false;
+        updateReview(findingId, status);
+        return true;
+      } catch {
+        return false;
+      }
+    },
+    [assessment.id, assessment.organizationId, eventIds, updateReview],
+  );
+
   const value = useMemo<DemoContextValue>(
     () => ({
       assessment,
@@ -188,6 +218,7 @@ export function DemoProvider({ children }: { children: ReactNode }) {
       reset,
       setLens,
       updateReview,
+      submitReview,
       hasEvent: (eventId) => eventIds.includes(eventId),
       hydrated,
     }),
@@ -202,6 +233,7 @@ export function DemoProvider({ children }: { children: ReactNode }) {
       reset,
       setLens,
       updateReview,
+      submitReview,
       hydrated,
     ],
   );
