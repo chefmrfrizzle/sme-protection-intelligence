@@ -109,3 +109,11 @@ export const eventPresentation: Record<
     affected: "Business Continuity",
   },
 };
+
+export const findingIdByEventId: Record<string, string> = {
+  event_new_warehouse: "finding_new_location",
+  event_asset_increase: "finding_asset_value",
+  event_supplier_concentration: "finding_supplier_concentration",
+  event_cloud_dependency: "finding_cloud_dependency",
+  event_new_geography: "finding_new_geography",
+};

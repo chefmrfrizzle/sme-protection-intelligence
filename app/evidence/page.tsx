@@ -9,6 +9,8 @@ import {
   ShieldCheck,
 } from "lucide-react";
 import { PageHeader } from "@/components/page-header";
+import { useDemo } from "@/components/demo-provider";
+import { ViewLens } from "@/components/view-lens";
 import { evidenceArtifacts } from "@/demo/evidence";
 
 const typeLabels: Record<string, string> = {
@@ -25,34 +27,64 @@ const typeLabels: Record<string, string> = {
 };
 
 export default function EvidencePage() {
+  const { lens } = useDemo();
+  const summaryLabels = {
+    simple: [
+      "Documents provided",
+      "Ready to use",
+      "Files needing attention",
+      "How they were read",
+    ],
+    insurance: [
+      "Programme artifacts",
+      "Validated",
+      "Ingestion exceptions",
+      "Extraction mode",
+    ],
+    evidence: [
+      "Artifacts supplied",
+      "Schema validated",
+      "Unresolved ingestion errors",
+      "Extraction mode",
+    ],
+  }[lens];
   return (
     <div className="page-stack">
       <PageHeader
         eyebrow="Evidence register"
         title="Evidence"
-        description="Validated synthetic artifacts with direct provenance from extracted fact to source excerpt."
+        description={
+          lens === "simple"
+            ? "The documents and records used to review your current protection."
+            : lens === "insurance"
+              ? "Policy and business records used in the current protection assessment."
+              : "Validated synthetic artifacts with direct provenance from extracted fact to source excerpt."
+        }
         actions={
-          <div className="synthetic-pill">
-            <ShieldCheck size={14} /> 10 synthetic artifacts
+          <div className="button-row page-control-row">
+            <ViewLens />
+            <div className="synthetic-pill">
+              <ShieldCheck size={14} /> 10 synthetic artifacts
+            </div>
           </div>
         }
       />
       <div className="evidence-summary-grid">
         <article>
           <strong>10</strong>
-          <span>Artifacts supplied</span>
+          <span>{summaryLabels[0]}</span>
         </article>
         <article>
           <strong>10</strong>
-          <span>Validated</span>
+          <span>{summaryLabels[1]}</span>
         </article>
         <article>
           <strong>0</strong>
-          <span>Unresolved ingestion errors</span>
+          <span>{summaryLabels[2]}</span>
         </article>
         <article>
-          <strong>Replay</strong>
-          <span>Extraction mode</span>
+          <strong>{lens === "simple" ? "Saved demo" : "Replay"}</strong>
+          <span>{summaryLabels[3]}</span>
         </article>
       </div>
       <section className="evidence-register">
@@ -81,7 +113,9 @@ export default function EvidencePage() {
             <div className="document-body">
               <div className="provenance-strip">
                 <span>
-                  <Hash size={13} /> {artifact.sourceHash}
+                  <Hash size={13} />
+                  {lens === "simple" ? "File fingerprint" : "Source hash"}:{" "}
+                  {artifact.sourceHash}
                 </span>
                 <span>Version {artifact.version}</span>
                 <span>
@@ -90,7 +124,13 @@ export default function EvidencePage() {
                     dateStyle: "medium",
                   })}
                 </span>
-                <span>Replay validated · parser 1.3.0</span>
+                <span>
+                  {lens === "simple"
+                    ? "Validated for this demo"
+                    : lens === "insurance"
+                      ? "Replay validated"
+                      : "Replay validated · parser 1.3.0"}
+                </span>
               </div>
               {artifact.pages.map((page) => (
                 <article className="source-page" key={page.page}>
@@ -100,7 +140,12 @@ export default function EvidencePage() {
                   </div>
                   <p>{page.body}</p>
                   <span className="source-grounded">
-                    <Link2 size={13} /> Source-grounded excerpt
+                    <Link2 size={13} />
+                    {lens === "simple"
+                      ? "Used in assessment"
+                      : lens === "insurance"
+                        ? "Relevant evidence"
+                        : "Source-grounded excerpt"}
                   </span>
                 </article>
               ))}

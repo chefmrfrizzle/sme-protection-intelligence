@@ -6,6 +6,7 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
   type ReactNode,
 } from "react";
@@ -15,6 +16,8 @@ import type { Assessment, ReviewStatus } from "@/domain/types";
 import { demoEvents } from "@/demo/events";
 
 const STORAGE_KEY = "product-demo-state-v2";
+
+export type ExplanationLens = "simple" | "insurance" | "evidence";
 
 export type ReviewRecord = {
   status: ReviewStatus;
@@ -26,15 +29,19 @@ export type ReviewRecord = {
 type StoredState = {
   eventIds: string[];
   reviews: Record<string, ReviewRecord>;
+  lens: ExplanationLens;
 };
 
 type DemoContextValue = {
   assessment: Assessment;
   eventIds: string[];
   reviews: Record<string, ReviewRecord>;
+  lens: ExplanationLens;
   applyEvent: (eventId: string) => void;
+  toggleEvent: (eventId: string) => void;
   applyAll: () => void;
   reset: () => void;
+  setLens: (lens: ExplanationLens) => void;
   updateReview: (findingId: string, status: ReviewStatus) => void;
   hasEvent: (eventId: string) => boolean;
   hydrated: boolean;
@@ -45,7 +52,7 @@ const DemoContext = createContext<DemoContextValue | null>(null);
 function readStoredState(): StoredState {
   try {
     const raw = window.localStorage.getItem(STORAGE_KEY);
-    if (!raw) return { eventIds: [], reviews: {} };
+    if (!raw) return { eventIds: [], reviews: {}, lens: "simple" };
     const parsed = JSON.parse(raw) as Partial<StoredState>;
     return {
       eventIds: Array.isArray(parsed.eventIds) ? parsed.eventIds : [],
@@ -53,22 +60,31 @@ function readStoredState(): StoredState {
         parsed.reviews && typeof parsed.reviews === "object"
           ? parsed.reviews
           : {},
+      lens:
+        parsed.lens === "insurance" || parsed.lens === "evidence"
+          ? parsed.lens
+          : "simple",
     };
   } catch {
-    return { eventIds: [], reviews: {} };
+    return { eventIds: [], reviews: {}, lens: "simple" };
   }
 }
 
 export function DemoProvider({ children }: { children: ReactNode }) {
   const [eventIds, setEventIds] = useState<string[]>([]);
   const [reviews, setReviews] = useState<Record<string, ReviewRecord>>({});
+  const [lens, setLensState] = useState<ExplanationLens>("simple");
   const [hydrated, setHydrated] = useState(false);
+  const interactedBeforeHydration = useRef(false);
 
   useEffect(() => {
     const frame = window.requestAnimationFrame(() => {
       const stored = readStoredState();
-      setEventIds(stored.eventIds);
-      setReviews(stored.reviews);
+      if (!interactedBeforeHydration.current) {
+        setEventIds(stored.eventIds);
+        setReviews(stored.reviews);
+        setLensState(stored.lens);
+      }
       setHydrated(true);
     });
     return () => window.cancelAnimationFrame(frame);
@@ -76,29 +92,51 @@ export function DemoProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (!hydrated) return;
-    window.localStorage.setItem(
-      STORAGE_KEY,
-      JSON.stringify({ eventIds, reviews }),
-    );
-  }, [eventIds, reviews, hydrated]);
+    try {
+      window.localStorage.setItem(
+        STORAGE_KEY,
+        JSON.stringify({ eventIds, reviews, lens }),
+      );
+    } catch {
+      // The deterministic demo remains usable when browser storage is blocked.
+    }
+  }, [eventIds, reviews, lens, hydrated]);
 
   const applyEvent = useCallback((eventId: string) => {
+    interactedBeforeHydration.current = true;
     setEventIds((current) =>
       current.includes(eventId) ? current : [...current, eventId],
     );
   }, []);
 
+  const toggleEvent = useCallback((eventId: string) => {
+    interactedBeforeHydration.current = true;
+    setEventIds((current) =>
+      current.includes(eventId)
+        ? current.filter((id) => id !== eventId)
+        : [...current, eventId],
+    );
+  }, []);
+
   const applyAll = useCallback(() => {
+    interactedBeforeHydration.current = true;
     setEventIds(demoEvents.map((event) => event.id!));
   }, []);
 
   const reset = useCallback(() => {
+    interactedBeforeHydration.current = true;
     setEventIds([]);
     setReviews({});
   }, []);
 
+  const setLens = useCallback((nextLens: ExplanationLens) => {
+    interactedBeforeHydration.current = true;
+    setLensState(nextLens);
+  }, []);
+
   const updateReview = useCallback(
     (findingId: string, status: ReviewStatus) => {
+      interactedBeforeHydration.current = true;
       setReviews((current) => ({
         ...current,
         [findingId]: {
@@ -143,9 +181,12 @@ export function DemoProvider({ children }: { children: ReactNode }) {
       assessment,
       eventIds,
       reviews,
+      lens,
       applyEvent,
+      toggleEvent,
       applyAll,
       reset,
+      setLens,
       updateReview,
       hasEvent: (eventId) => eventIds.includes(eventId),
       hydrated,
@@ -154,9 +195,12 @@ export function DemoProvider({ children }: { children: ReactNode }) {
       assessment,
       eventIds,
       reviews,
+      lens,
       applyEvent,
+      toggleEvent,
       applyAll,
       reset,
+      setLens,
       updateReview,
       hydrated,
     ],

@@ -205,3 +205,72 @@ export const AgentRunSchema = z.object({
   sourceGrounded: z.boolean(),
   status: z.enum(["VALIDATED", "ABSTAINED", "FAILED"]),
 });
+
+export const ReviewCaseEvidenceSchema = z.object({
+  id: z.string().min(1),
+  title: z.string().min(1),
+  fileName: z.string().min(1),
+  documentType: EvidenceArtifactSchema.shape.documentType,
+  version: z.string().min(1),
+  sourceHash: z.string().min(8),
+  synthetic: z.literal(true),
+});
+
+export const ReviewCaseOutboundPreviewSchema = z.object({
+  schemaVersion: z.literal("protection-review-case/1.0"),
+  caseId: z.string().min(1),
+  organizationId: z.string().min(1),
+  assessmentId: z.string().min(1),
+  assessmentVersion: z.number().int().positive(),
+  synthetic: z.literal(true),
+  observedChanges: z.array(
+    z.object({
+      eventId: z.string().min(1),
+      eventType: CanonicalChangeEventSchema.shape.eventType,
+      observedAt: z.string().datetime(),
+      evidenceReferences: z.array(z.string()),
+    }),
+  ),
+  reviewItems: z.array(
+    z.object({
+      findingId: z.string().min(1),
+      domain: ProtectionDomainSchema,
+      state: ProtectionStateSchema,
+      ruleId: z.string().min(1),
+      ruleVersion: z.string().min(1),
+      evidenceReferences: z.array(z.string()),
+      missingEvidence: z.array(z.string()),
+      challengeOutcome: ChallengeResultSchema.shape.outcome,
+    }),
+  ),
+  allowedActions: z.array(
+    z.enum(["ROUTE_FOR_REVIEW", "REQUEST_EVIDENCE", "ABSTAIN"]),
+  ),
+});
+
+export const ProtectionReviewCaseSchema = z.object({
+  id: z.string().min(1),
+  organizationId: z.string().min(1),
+  assessmentId: z.string().min(1),
+  assessmentVersion: z.number().int().positive(),
+  createdAt: z.string().datetime(),
+  synthetic: z.literal(true),
+  state: z.enum([
+    "READY_FOR_PROFESSIONAL_REVIEW",
+    "EVIDENCE_REQUIRED",
+    "NO_ACTIVE_REVIEW",
+  ]),
+  events: z.array(CanonicalChangeEventSchema),
+  findings: z.array(FindingSchema),
+  evidence: z.array(ReviewCaseEvidenceSchema),
+  allowedActions: ReviewCaseOutboundPreviewSchema.shape.allowedActions,
+  receiptHash: z.string().min(8),
+  integration: z.object({
+    adapter: z.literal("ZURICH_COMPATIBLE_DEMO"),
+    mode: z.literal("MOCK"),
+    connectionState: z.literal("NOT_CONNECTED"),
+    destination: z.literal("COUNTRY_WORKFLOW_TO_BE_VALIDATED"),
+    conformity: z.literal("MAPPING_READY_NOT_CERTIFIED"),
+  }),
+  outboundPreview: ReviewCaseOutboundPreviewSchema,
+});

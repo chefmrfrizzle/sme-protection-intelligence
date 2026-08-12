@@ -34,32 +34,33 @@ export function ProtectionDiff({ eventIds }: { eventIds: string[] }) {
     <div className="diff-panel">
       <div className="diff-heading">
         <div>
-          <p className="eyebrow">Protection Diff</p>
-          <h2>What changed since the baseline</h2>
+          <p className="eyebrow">Baseline comparison</p>
+          <h2>How the business changed</h2>
         </div>
         <div className="version-pair">
-          <span>Profile v1</span>
+          <span>Starting profile</span>
           <ArrowRight aria-hidden="true" size={16} />
-          <strong>Profile v{eventIds.length + 1}</strong>
+          <strong>Current v{eventIds.length + 1}</strong>
         </div>
       </div>
       <div
-        className="diff-table"
-        role="table"
-        aria-label="Protection profile changes"
+        className="change-summary-grid"
+        role="list"
+        aria-label="Business profile comparison"
       >
         {rows.map(([label, before, after]) => (
           <div
-            className={`diff-row ${before !== after ? "changed" : ""}`}
-            role="row"
+            className={`change-summary-card ${before !== after ? "changed" : ""}`}
+            role="listitem"
             key={label}
           >
-            <span className="diff-label" role="cell">
-              {label}
-            </span>
-            <span role="cell">{before}</span>
-            <ArrowRight aria-hidden="true" size={15} />
-            <strong role="cell">{after}</strong>
+            <span className="diff-label">{label}</span>
+            <div>
+              <span>{before}</span>
+              <ArrowRight aria-hidden="true" size={15} />
+              <strong>{after}</strong>
+            </div>
+            <small>{before !== after ? "Changed" : "No change"}</small>
           </div>
         ))}
       </div>

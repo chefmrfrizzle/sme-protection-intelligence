@@ -11,10 +11,11 @@ import { Disclaimer } from "@/components/disclaimer";
 import { PageHeader } from "@/components/page-header";
 import { StatusBadge } from "@/components/status-badge";
 import { useDemo } from "@/components/demo-provider";
+import { ViewLens } from "@/components/view-lens";
 import { brand } from "@/domain/brand";
 
 export default function ReportsPage() {
-  const { assessment, eventIds, reviews } = useDemo();
+  const { assessment, eventIds, reviews, lens } = useDemo();
   const reviewQuery = Object.entries(reviews)
     .map(([findingId, review]) => `${findingId}:${review.status}`)
     .join(",");
@@ -24,15 +25,24 @@ export default function ReportsPage() {
       <PageHeader
         eyebrow="Reports and receipts"
         title="Protection Alignment Report"
-        description="A professional, source-grounded assessment artifact for SME, broker, insurer and audit review."
+        description={
+          lens === "simple"
+            ? "A shareable summary of what changed, what needs attention and what information was used."
+            : lens === "insurance"
+              ? "A professional assessment artifact for SME, broker and insurer review."
+              : "A source-grounded, versioned assessment artifact with evidence and audit receipts."
+        }
         actions={
-          <a
-            className="button primary"
-            href={reportUrl}
-            data-testid="download-report"
-          >
-            <Download size={16} /> Download PDF
-          </a>
+          <div className="button-row page-control-row">
+            <ViewLens />
+            <a
+              className="button primary"
+              href={reportUrl}
+              data-testid="download-report"
+            >
+              <Download size={16} /> Download PDF
+            </a>
+          </div>
         }
       />
       <div className="report-layout">
@@ -80,7 +90,13 @@ export default function ReportsPage() {
               assessment.findings.slice(0, 3).map((finding) => (
                 <div className="mini-finding" key={finding.id}>
                   <strong>{finding.title}</strong>
-                  <span>{finding.simpleExplanation}</span>
+                  <span>
+                    {lens === "simple"
+                      ? finding.simpleExplanation
+                      : lens === "insurance"
+                        ? finding.insuranceExplanation
+                        : `${finding.evidenceIds.length} linked artifacts · ${finding.ruleTrace.ruleId} v${finding.ruleTrace.ruleVersion}`}
+                  </span>
                 </div>
               ))
             ) : (
@@ -102,7 +118,11 @@ export default function ReportsPage() {
             <FileText size={22} />
             <h2>Assessment v{assessment.version}</h2>
             <p>
-              Generated from the current synthetic evidence and event snapshot.
+              {lens === "simple"
+                ? "Built from the current demo documents and selected business changes."
+                : lens === "insurance"
+                  ? "Generated from the current synthetic exposure and programme-evidence snapshot."
+                  : "Generated from the versioned synthetic evidence and canonical-event snapshot."}
             </p>
             <dl>
               <div>
@@ -129,21 +149,35 @@ export default function ReportsPage() {
           <div className="receipt-panel">
             <Fingerprint size={18} />
             <div>
-              <strong>Assessment Receipt</strong>
-              <span>{assessment.receiptHash}</span>
+              <strong>
+                {lens === "simple" ? "Report tracking" : "Assessment receipt"}
+              </strong>
+              <span>
+                {lens === "evidence"
+                  ? assessment.receiptHash
+                  : "Included with the PDF"}
+              </span>
             </div>
           </div>
           <div className="receipt-panel">
             <FileCheck2 size={18} />
             <div>
-              <strong>Evidence Snapshot</strong>
-              <span>{assessment.evidenceSnapshotId}</span>
+              <strong>
+                {lens === "simple" ? "Information set" : "Evidence snapshot"}
+              </strong>
+              <span>
+                {lens === "evidence"
+                  ? assessment.evidenceSnapshotId
+                  : "Versioned and recorded"}
+              </span>
             </div>
           </div>
           <div className="receipt-panel">
             <ShieldCheck size={18} />
             <div>
-              <strong>Human review</strong>
+              <strong>
+                {lens === "simple" ? "Review status" : "Human review"}
+              </strong>
               <span>
                 {assessment.findings.some(
                   (finding) => finding.reviewStatus !== "OPEN",

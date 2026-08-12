@@ -15,10 +15,11 @@ import { DomainCard } from "@/components/domain-card";
 import { PageHeader } from "@/components/page-header";
 import { ProtectionDiff } from "@/components/protection-diff";
 import { useDemo } from "@/components/demo-provider";
+import { ViewLens } from "@/components/view-lens";
 import { demoCompany } from "@/demo/company";
 
 export default function OverviewPage() {
-  const { assessment, eventIds, applyEvent, reset } = useDemo();
+  const { assessment, eventIds, lens, applyEvent, reset } = useDemo();
   const reviewCount = assessment.findings.filter(
     (finding) => finding.state !== "ALIGNED",
   ).length;
@@ -27,6 +28,21 @@ export default function OverviewPage() {
     0,
   );
   const hasWarehouse = eventIds.includes("event_new_warehouse");
+  const evidencePresent = assessment.domains.reduce(
+    (total, domain) => total + domain.evidencePresent,
+    0,
+  );
+  const evidenceRequired = assessment.domains.reduce(
+    (total, domain) => total + domain.evidenceRequired,
+    0,
+  );
+  const alignmentCopy = {
+    simple:
+      "How closely the information you supplied matches the way your business operates today.",
+    insurance:
+      "Deterministic alignment and evidence completeness across the four protection domains in scope.",
+    evidence: `${evidencePresent} of ${evidenceRequired} required checks currently have supporting information.`,
+  }[lens];
 
   return (
     <div className="page-stack">
@@ -41,9 +57,12 @@ export default function OverviewPage() {
           timeZone: "Asia/Singapore",
         })} SGT`}
         actions={
-          <button className="button secondary" type="button" onClick={reset}>
-            <RotateCcw aria-hidden="true" size={16} /> Reset demo
-          </button>
+          <div className="button-row page-control-row">
+            <ViewLens />
+            <button className="button secondary" type="button" onClick={reset}>
+              <RotateCcw aria-hidden="true" size={16} /> Reset demo
+            </button>
+          </div>
         }
       />
 
@@ -52,18 +71,22 @@ export default function OverviewPage() {
           <div className="alignment-copy">
             <p className="eyebrow">Protection Alignment</p>
             <h2>{assessment.alignment}% evidence-aligned</h2>
-            <p>
-              Deterministic completeness and alignment across four evaluated
-              protection domains.
-            </p>
+            <p>{alignmentCopy}</p>
             <details className="methodology-details">
               <summary>
-                <Info aria-hidden="true" size={14} /> How this is calculated
+                <Info aria-hidden="true" size={14} />
+                {lens === "simple"
+                  ? "What this means"
+                  : lens === "insurance"
+                    ? "How this is calculated"
+                    : "Evidence basis"}
               </summary>
               <p>
-                60% explicit alignment state and 40% required-evidence
-                completeness, averaged across in-scope domains. It is not an
-                underwriting, loss, pricing, claim, or insurer score.
+                {lens === "simple"
+                  ? "It is a check of the information available today. It does not confirm insurance coverage or predict a claim outcome."
+                  : lens === "insurance"
+                    ? "60% explicit alignment state and 40% required-evidence completeness, averaged across in-scope domains. It is not an underwriting, loss, pricing, claim, or insurer score."
+                    : `The indicator uses ${evidencePresent} available checks from ${evidenceRequired} required checks, plus the explicit state of each assessed domain.`}
               </p>
             </details>
           </div>
@@ -158,7 +181,14 @@ export default function OverviewPage() {
         </div>
         <div className="domain-grid">
           {assessment.domains.map((domain) => (
-            <DomainCard domain={domain} key={domain.domain} />
+            <DomainCard
+              domain={domain}
+              lens={lens}
+              finding={assessment.findings.find((finding) =>
+                domain.findingIds.includes(finding.id),
+              )}
+              key={domain.domain}
+            />
           ))}
         </div>
       </section>

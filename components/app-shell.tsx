@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import {
   Activity,
   Boxes,
+  ClipboardCheck,
   FileOutput,
   Files,
   FlaskConical,
@@ -24,6 +25,7 @@ const primaryNavigation = [
   { href: "/changes", label: "Changes", icon: Activity },
   { href: "/protection", label: "Protection", icon: ShieldCheck },
   { href: "/evidence", label: "Evidence", icon: Files },
+  { href: "/review-case", label: "Review case", icon: ClipboardCheck },
   { href: "/reports", label: "Reports", icon: FileOutput },
 ] as const;
 
@@ -46,12 +48,16 @@ function NavLink({
   onClick?: () => void;
 }) {
   const pathname = usePathname();
-  const active = pathname === href || pathname.startsWith(`${href}/`);
+  const active =
+    pathname === href ||
+    pathname.startsWith(`${href}/`) ||
+    (href === "/protection" && pathname.startsWith("/findings/"));
   return (
     <Link
       className={`nav-link ${active ? "active" : ""}`}
       href={href}
       onClick={onClick}
+      aria-current={active ? "page" : undefined}
     >
       <Icon aria-hidden="true" size={18} strokeWidth={1.8} />
       <span>{label}</span>

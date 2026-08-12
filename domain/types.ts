@@ -9,6 +9,7 @@ import type {
   EvidenceArtifactSchema,
   FindingSchema,
   ProtectionDomainSchema,
+  ProtectionReviewCaseSchema,
   ProtectionStateSchema,
   ReviewStatusSchema,
   RuleTraceSchema,
@@ -30,6 +31,7 @@ export type DomainAssessment = z.infer<typeof DomainAssessmentSchema>;
 export type AuditEvent = z.infer<typeof AuditEventSchema>;
 export type Assessment = z.infer<typeof AssessmentSchema>;
 export type AgentRun = z.infer<typeof AgentRunSchema>;
+export type ProtectionReviewCase = z.infer<typeof ProtectionReviewCaseSchema>;
 
 export type ExposureSnapshot = {
   locationIds: string[];

@@ -28,6 +28,12 @@ test("reset-to-report storyline is deterministic and reviewable", async ({
   ).toBeVisible();
   await page.getByTestId("open-finding").first().click();
 
+  if ((page.viewportSize()?.width ?? 0) > 820) {
+    await expect(
+      page.getByRole("link", { name: "Protection", exact: true }),
+    ).toHaveAttribute("aria-current", "page");
+  }
+
   await expect(
     page.getByText("Potential gap", { exact: true }).first(),
   ).toBeVisible();
@@ -37,13 +43,16 @@ test("reset-to-report storyline is deterministic and reviewable", async ({
       .first(),
   ).toBeVisible();
   await expect(
-    page.getByRole("heading", { name: "SURVIVES" }).first(),
+    page.getByRole("heading", { name: "The item still needs review" }).first(),
   ).toBeVisible();
   await expect(
     page.getByText(/not a coverage determination/i).first(),
   ).toBeVisible();
 
   await page.getByRole("tab", { name: "Insurance" }).first().click();
+  await expect(
+    page.getByRole("heading", { name: "SURVIVES" }).first(),
+  ).toBeVisible();
   await expect(
     page.getByText(/possible scheduled-location mismatch/i).first(),
   ).toBeVisible();
@@ -57,6 +66,14 @@ test("reset-to-report storyline is deterministic and reviewable", async ({
   await page.getByTestId("request-review").first().click();
   await expect(
     page.getByText("REVIEWING", { exact: true }).first(),
+  ).toBeVisible();
+  await page.getByRole("link", { name: "Open review case" }).click();
+  await expect(
+    page.getByRole("heading", { name: "Protection Review Case" }),
+  ).toBeVisible();
+  await expect(page.getByText(/Mock adapter · Not connected/i)).toBeVisible();
+  await expect(
+    page.getByText("READY FOR PROFESSIONAL REVIEW", { exact: true }),
   ).toBeVisible();
 
   await page.goto("/changes");
@@ -90,6 +107,67 @@ test("reset-to-report storyline is deterministic and reviewable", async ({
   await expect(
     page.getByText("CHALLENGE PASS COMPLETED", { exact: true }).first(),
   ).toBeVisible();
+});
+
+test("scenario selections are reversible and explanation view persists", async ({
+  page,
+}) => {
+  await page.goto("/simulator");
+  await page
+    .getByRole("main")
+    .getByRole("button", { name: "Reset", exact: true })
+    .click();
+
+  const addWarehouse = page.getByRole("button", {
+    name: /Add New warehouse detected to scenario/i,
+  });
+  await addWarehouse.click();
+  await expect(
+    page.getByRole("button", {
+      name: /Remove New warehouse detected from scenario/i,
+    }),
+  ).toHaveAttribute("aria-pressed", "true");
+  await expect(page.getByText("Current v2", { exact: true })).toBeVisible();
+
+  await page
+    .getByRole("button", {
+      name: /Remove New warehouse detected from scenario/i,
+    })
+    .click();
+  await expect(
+    page.getByRole("button", {
+      name: /Add New warehouse detected to scenario/i,
+    }),
+  ).toHaveAttribute("aria-pressed", "false");
+  await expect(
+    page
+      .getByRole("main")
+      .getByText("No selected change currently requires review."),
+  ).toBeVisible();
+
+  await page.goto("/overview");
+  await page.getByRole("tab", { name: "Insurance" }).click();
+  await expect(
+    page.getByText(/deterministic alignment and evidence completeness/i),
+  ).toBeVisible();
+  await page.goto("/evidence");
+  await expect(
+    page.getByText(/policy and business records used in the current/i),
+  ).toBeVisible();
+  await expect(page.getByRole("tab", { name: "Insurance" })).toHaveAttribute(
+    "aria-selected",
+    "true",
+  );
+
+  await page.goto("/changes");
+  await page
+    .getByRole("main")
+    .getByRole("button", { name: "Reset", exact: true })
+    .click();
+  await page.getByRole("button", { name: "Run full storyline" }).click();
+  await expect(page.getByRole("link", { name: "Open assessment" })).toHaveCount(
+    5,
+  );
 });
 
 test("canonical event endpoint validates input without persisting it", async ({
