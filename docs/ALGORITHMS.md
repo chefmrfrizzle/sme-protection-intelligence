@@ -74,3 +74,22 @@ An assessment version serializes organization, snapshot time, sorted evidence ID
 ## 9. Minimum evidence request
 
 For each unresolved state, choose the smallest ordered set of missing checklist items that can change the rule outcome. Already supplied, stale, or lower-priority duplicates are excluded. The demo stores these requests explicitly so explanations cannot invent new document requirements.
+
+## 10. Professional review priority
+
+The queue is deterministic and transparent. Recorded days to policy-period end
+are calculated from the supplied schedule and assessment clock. A case is urgent
+inside 30 days; otherwise potential gaps, evidence conflicts, and
+interpretation-required findings are high priority. Evidence-incomplete and
+review-recommended findings are standard; out-of-scope findings are monitor.
+Every queue item stores the human-readable reasons used for the priority. The
+countdown is context only and never claims that protection will expire.
+
+## 11. Professional decisions and discussion
+
+`CONFIRMED` means a reviewer confirms that the finding should remain in the
+decision-support record. It does not confirm insurance coverage. `DISMISSED`
+requires evidence or rationale; `ESCALATED` records referral to an appropriate
+professional; `MORE_EVIDENCE_REQUESTED` opens the minimum evidence set. Review
+actions and comments append new records and audit receipts rather than altering
+historical events.

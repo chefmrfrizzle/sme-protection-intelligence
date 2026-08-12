@@ -69,12 +69,24 @@ test("reset-to-report storyline is deterministic and reviewable", async ({
   ).toBeVisible();
   await page.getByRole("link", { name: "Open review case" }).click();
   await expect(
-    page.getByRole("heading", { name: "Protection Review Case" }),
+    page.getByRole("heading", { name: "Protection review queue" }),
   ).toBeVisible();
-  await expect(page.getByText(/Mock adapter · Not connected/i)).toBeVisible();
   await expect(
-    page.getByText("READY FOR PROFESSIONAL REVIEW", { exact: true }),
+    page.getByText(/External adapters · Not connected/i),
   ).toBeVisible();
+  await expect(
+    page.getByText("Recorded renewal context", { exact: true }),
+  ).toBeVisible();
+  await page.getByRole("tab", { name: "Exposure" }).click();
+  await expect(page.getByRole("heading", { name: "Property" })).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "Business interruption" }),
+  ).toBeVisible();
+  await page.getByRole("tab", { name: "Export" }).click();
+  await expect(
+    page.getByText(/Future Zurich eXchange mapping preview/i),
+  ).toBeVisible();
+  await expect(page.getByText(/Nothing is sent to Zurich/i)).toBeVisible();
 
   await page.goto("/changes");
   const cloudCard = page
@@ -224,6 +236,41 @@ test("review endpoint validates the tenant and active finding", async ({
     data: { ...payload, findingId: "finding_not_active" },
   });
   expect(rejected.status()).toBe(409);
+});
+
+test("review activity endpoint validates case scope and stays replayable", async ({
+  request,
+}) => {
+  const payload = {
+    organizationId: "org_pacific_components",
+    assessmentId: "assessment_v2",
+    caseId: "case_assessment_v2",
+    findingId: "finding_new_location",
+    eventIds: ["event_new_warehouse"],
+    activityType: "COMMENT_ADDED",
+    visibility: "PROFESSIONAL_ONLY",
+    message: "Please validate the current endorsement pack.",
+    author: { displayName: "Demo reviewer", role: "BROKER_RISK_ADVISOR" },
+    idempotencyKey: "e2e-comment-location",
+  };
+  const response = await request.post("/api/review-activity", {
+    data: payload,
+  });
+  expect(response.status()).toBe(201);
+  await expect(response.json()).resolves.toMatchObject({
+    accepted: true,
+    persisted: false,
+    storageMode: "DEMO_REPLAY",
+    activity: {
+      caseId: "case_assessment_v2",
+      visibility: "PROFESSIONAL_ONLY",
+    },
+  });
+
+  const rejected = await request.post("/api/review-activity", {
+    data: { ...payload, caseId: "case_assessment_v9" },
+  });
+  expect(rejected.status()).toBe(403);
 });
 
 test("public demo exposes optional sign-in without exposing a session", async ({

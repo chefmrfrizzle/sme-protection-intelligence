@@ -4,8 +4,11 @@ import { DEMO_ORGANIZATION_ID, demoCompany } from "@/demo/company";
 import { evidenceArtifacts } from "@/demo/evidence";
 import { buildAssessment } from "@/domain/reconciliation/engine";
 import { demoHash } from "@/domain/reconciliation/hash";
-import { ReviewReceiptSchema } from "@/domain/schemas";
-import type { ReviewReceipt } from "@/domain/types";
+import {
+  ReviewActivityReceiptSchema,
+  ReviewReceiptSchema,
+} from "@/domain/schemas";
+import type { ReviewActivityReceipt, ReviewReceipt } from "@/domain/types";
 import type {
   PersistenceResult,
   ProtectionRepositories,
@@ -201,6 +204,114 @@ export const postgresRepositories: ProtectionRepositories = {
         reviewer: "Signed-in reviewer",
         role: row.reviewer_role,
         rationale: row.rationale ?? undefined,
+        occurredAt: toIso(row.occurred_at),
+        idempotencyKey: row.idempotency_key,
+      }));
+    },
+  },
+  reviewActivity: {
+    async append(scope, command, occurredAt): Promise<ReviewActivityReceipt> {
+      const sql = getDatabase();
+      await ensureMembership(sql, scope);
+      return sql.begin(async (transaction) => {
+        const existing = await transaction`
+          select id::text, organization_id, assessment_id, case_id, finding_id,
+            activity_type, visibility, message, author_subject, author_role,
+            idempotency_key, occurred_at
+          from review_activities
+          where organization_id = ${scope.organizationId}
+            and idempotency_key = ${command.idempotencyKey}
+          limit 1
+        `;
+        const row =
+          existing[0] ??
+          (
+            await transaction`
+              insert into review_activities (
+                organization_id, assessment_id, case_id, finding_id,
+                activity_type, visibility, message, author_subject,
+                author_role, idempotency_key, occurred_at, receipt_hash
+              ) values (
+                ${scope.organizationId}, ${command.assessmentId}, ${command.caseId},
+                ${command.findingId ?? null}, ${command.activityType},
+                ${command.visibility}, ${command.message}, ${scope.actorUserId!},
+                ${command.author.role}, ${command.idempotencyKey}, ${occurredAt},
+                ${demoHash({ command, occurredAt, actor: scope.actorUserId })}
+              )
+              returning id::text, organization_id, assessment_id, case_id,
+                finding_id, activity_type, visibility, message, author_subject,
+                author_role, idempotency_key, occurred_at
+            `
+          )[0];
+        const activity = {
+          id: row.id,
+          organizationId: row.organization_id,
+          assessmentId: row.assessment_id,
+          caseId: row.case_id,
+          findingId: row.finding_id ?? undefined,
+          activityType: row.activity_type,
+          visibility: row.visibility,
+          message: row.message,
+          author: command.author.displayName,
+          role: row.author_role,
+          occurredAt: toIso(row.occurred_at),
+          idempotencyKey: row.idempotency_key,
+        };
+        const auditEvent = {
+          id: `audit_${activity.id}`,
+          organizationId: scope.organizationId,
+          eventType: "REVIEW_COMMENT_ADDED",
+          actor: `${activity.author} (${activity.role})`,
+          occurredAt: activity.occurredAt,
+          summary: `A ${activity.visibility.toLowerCase().replaceAll("_", " ")} review comment was added.`,
+          snapshotHash: demoHash(activity),
+        };
+        if (!existing.length) {
+          await transaction`
+            insert into audit_events (
+              id, organization_id, event_type, actor_subject, summary,
+              payload, snapshot_hash, occurred_at
+            ) values (
+              ${randomUUID()}, ${scope.organizationId}, ${auditEvent.eventType},
+              ${scope.actorUserId!}, ${auditEvent.summary},
+              ${transaction.json({ activityId: activity.id, findingId: activity.findingId })},
+              ${auditEvent.snapshotHash}, ${auditEvent.occurredAt}
+            )
+          `;
+        }
+        return ReviewActivityReceiptSchema.parse({
+          accepted: true,
+          persisted: true,
+          storageMode: "POSTGRES",
+          activity,
+          auditEvent,
+          receiptHash: demoHash({ activity, auditEvent }),
+        });
+      });
+    },
+    async list(scope, assessmentId) {
+      const sql = getDatabase();
+      await ensureMembership(sql, scope);
+      const rows = await sql`
+        select id::text, organization_id, assessment_id, case_id, finding_id,
+          activity_type, visibility, message, author_role, idempotency_key,
+          occurred_at
+        from review_activities
+        where organization_id = ${scope.organizationId}
+          and assessment_id = ${assessmentId}
+        order by occurred_at asc
+      `;
+      return rows.map((row) => ({
+        id: row.id,
+        organizationId: row.organization_id,
+        assessmentId: row.assessment_id,
+        caseId: row.case_id,
+        findingId: row.finding_id ?? undefined,
+        activityType: row.activity_type,
+        visibility: row.visibility,
+        message: row.message,
+        author: "Signed-in reviewer",
+        role: row.author_role,
         occurredAt: toIso(row.occurred_at),
         idempotencyKey: row.idempotency_key,
       }));

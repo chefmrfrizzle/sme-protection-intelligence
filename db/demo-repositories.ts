@@ -2,8 +2,11 @@ import { evidenceArtifacts } from "@/demo/evidence";
 import { DEMO_ORGANIZATION_ID } from "@/demo/company";
 import { buildAssessment } from "@/domain/reconciliation/engine";
 import { demoHash } from "@/domain/reconciliation/hash";
-import { ReviewReceiptSchema } from "@/domain/schemas";
-import type { ReviewReceipt } from "@/domain/types";
+import {
+  ReviewActivityReceiptSchema,
+  ReviewReceiptSchema,
+} from "@/domain/schemas";
+import type { ReviewActivityReceipt, ReviewReceipt } from "@/domain/types";
 import type {
   PersistenceResult,
   ProtectionRepositories,
@@ -74,6 +77,46 @@ export const demoRepositories: ProtectionRepositories = {
         review,
         auditEvent,
         receiptHash: demoHash({ review, auditEvent }),
+      });
+    },
+    async list(scope) {
+      assertDemoTenant(scope);
+      return [];
+    },
+  },
+  reviewActivity: {
+    async append(scope, command, occurredAt): Promise<ReviewActivityReceipt> {
+      assertDemoTenant(scope);
+      const activity = {
+        id: `activity_${demoHash({ command, occurredAt }).slice(-16)}`,
+        organizationId: scope.organizationId,
+        assessmentId: command.assessmentId,
+        caseId: command.caseId,
+        findingId: command.findingId,
+        activityType: command.activityType,
+        visibility: command.visibility,
+        message: command.message,
+        author: command.author.displayName,
+        role: command.author.role,
+        occurredAt,
+        idempotencyKey: command.idempotencyKey,
+      };
+      const auditEvent = {
+        id: `audit_${activity.id}`,
+        organizationId: scope.organizationId,
+        eventType: "REVIEW_COMMENT_ADDED",
+        actor: `${activity.author} (${activity.role})`,
+        occurredAt,
+        summary: `A ${activity.visibility.toLowerCase().replaceAll("_", " ")} review comment was added.`,
+        snapshotHash: demoHash(activity),
+      };
+      return ReviewActivityReceiptSchema.parse({
+        accepted: true,
+        persisted: false,
+        storageMode: "DEMO_REPLAY",
+        activity,
+        auditEvent,
+        receiptHash: demoHash({ activity, auditEvent }),
       });
     },
     async list(scope) {

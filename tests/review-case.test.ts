@@ -23,8 +23,11 @@ describe("protection review case", () => {
     expect(first).toEqual(second);
     expect(first.state).toBe("READY_FOR_PROFESSIONAL_REVIEW");
     expect(first.integration).toMatchObject({
+      adapter: "INSURER_NEUTRAL_DEMO",
       mode: "MOCK",
       connectionState: "NOT_CONNECTED",
+      mappingTarget: "ZURICH_EXCHANGE",
+      mappingStatus: "UNVALIDATED",
       conformity: "MAPPING_READY_NOT_CERTIFIED",
     });
     expect(first.allowedActions).not.toContain("BIND_POLICY");

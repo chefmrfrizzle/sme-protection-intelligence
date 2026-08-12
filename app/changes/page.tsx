@@ -13,8 +13,16 @@ import {
 } from "@/demo/events";
 
 export default function ChangesPage() {
-  const { assessment, eventIds, lens, hasEvent, applyEvent, applyAll, reset } =
-    useDemo();
+  const {
+    assessment,
+    eventIds,
+    lens,
+    hasEvent,
+    applyEvent,
+    applyAll,
+    reset,
+    hydrated,
+  } = useDemo();
   return (
     <div className="page-stack">
       <PageHeader
@@ -30,10 +38,20 @@ export default function ChangesPage() {
         actions={
           <div className="button-row page-control-row">
             <ViewLens />
-            <button className="button secondary" type="button" onClick={reset}>
+            <button
+              className="button secondary"
+              type="button"
+              onClick={reset}
+              disabled={!hydrated}
+            >
               <RotateCcw size={16} /> Reset
             </button>
-            <button className="button primary" type="button" onClick={applyAll}>
+            <button
+              className="button primary"
+              type="button"
+              onClick={applyAll}
+              disabled={!hydrated}
+            >
               <Play size={16} /> Run full storyline
             </button>
           </div>
@@ -118,6 +136,7 @@ export default function ChangesPage() {
                     className="button primary"
                     type="button"
                     onClick={() => applyEvent(event.id!)}
+                    disabled={!hydrated}
                   >
                     Apply change <ArrowRight size={15} />
                   </button>

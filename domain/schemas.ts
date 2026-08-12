@@ -40,6 +40,22 @@ export const ReviewCommandSchema = z.object({
   idempotencyKey: z.string().min(8).max(160),
 });
 
+export const ReviewActivityCommandSchema = z.object({
+  organizationId: z.string().min(1),
+  assessmentId: z.string().regex(/^assessment_v\d+$/),
+  caseId: z.string().regex(/^case_assessment_v\d+$/),
+  findingId: z.string().min(1).optional(),
+  eventIds: z.array(z.string().min(1)).max(25),
+  activityType: z.literal("COMMENT_ADDED"),
+  visibility: z.enum(["SHARED", "PROFESSIONAL_ONLY"]),
+  message: z.string().trim().min(2).max(1_500),
+  author: z.object({
+    displayName: z.string().min(1).max(120),
+    role: z.enum(["SME_USER", "BROKER_RISK_ADVISOR", "INSURER_REVIEWER"]),
+  }),
+  idempotencyKey: z.string().min(8).max(160),
+});
+
 export const SourceReferenceSchema = z.object({
   documentId: z.string().min(1),
   fileName: z.string().min(1),
@@ -209,6 +225,28 @@ export const ReviewReceiptSchema = z.object({
   receiptHash: z.string().min(8),
 });
 
+export const ReviewActivityReceiptSchema = z.object({
+  accepted: z.literal(true),
+  persisted: z.boolean(),
+  storageMode: z.enum(["DEMO_REPLAY", "POSTGRES"]),
+  activity: z.object({
+    id: z.string().min(1),
+    organizationId: z.string().min(1),
+    assessmentId: z.string().min(1),
+    caseId: z.string().min(1),
+    findingId: z.string().optional(),
+    activityType: z.literal("COMMENT_ADDED"),
+    visibility: z.enum(["SHARED", "PROFESSIONAL_ONLY"]),
+    message: z.string().min(1),
+    author: z.string().min(1),
+    role: z.enum(["SME_USER", "BROKER_RISK_ADVISOR", "INSURER_REVIEWER"]),
+    occurredAt: z.string().datetime(),
+    idempotencyKey: z.string().min(8),
+  }),
+  auditEvent: AuditEventSchema,
+  receiptHash: z.string().min(8),
+});
+
 export const AssessmentSchema = z.object({
   id: z.string().min(1),
   organizationId: z.string().min(1),
@@ -300,10 +338,12 @@ export const ProtectionReviewCaseSchema = z.object({
   allowedActions: ReviewCaseOutboundPreviewSchema.shape.allowedActions,
   receiptHash: z.string().min(8),
   integration: z.object({
-    adapter: z.literal("ZURICH_COMPATIBLE_DEMO"),
+    adapter: z.literal("INSURER_NEUTRAL_DEMO"),
     mode: z.literal("MOCK"),
     connectionState: z.literal("NOT_CONNECTED"),
-    destination: z.literal("COUNTRY_WORKFLOW_TO_BE_VALIDATED"),
+    mappingTarget: z.literal("ZURICH_EXCHANGE"),
+    mappingStatus: z.literal("UNVALIDATED"),
+    destination: z.literal("FUTURE_APPROVED_WORKFLOW_ONLY"),
     conformity: z.literal("MAPPING_READY_NOT_CERTIFIED"),
   }),
   outboundPreview: ReviewCaseOutboundPreviewSchema,
