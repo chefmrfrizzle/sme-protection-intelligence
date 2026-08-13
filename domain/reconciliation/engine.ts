@@ -225,7 +225,7 @@ function evaluateFindings(
       state: "REVIEW_RECOMMENDED",
       summary: `Observed assets are S$${exposure.assetValueSgd.toLocaleString("en-SG")}, compared with S$${policy.declaredAssetValueSgd.toLocaleString("en-SG")} in the supplied property schedule.`,
       simpleExplanation:
-        "Your recorded equipment and assets increased by S$350,000. The insured values you supplied have not changed with them.",
+        "Your recorded equipment and assets increased by S$350,000. The values recorded in the supplied property schedule have not changed with them.",
       insuranceExplanation:
         "Observed property values increased by 70%, exceeding both configured relative and absolute materiality thresholds. Declared values review is recommended.",
       whyItMatters:
@@ -276,7 +276,7 @@ function evaluateFindings(
       simpleExplanation:
         "Your business now relies much more heavily on one supplier for a critical component.",
       insuranceExplanation:
-        "Critical supplier dependency increased by 32 percentage points to 54%. Supply-chain and business-interruption dependency review is recommended.",
+        "Critical supplier dependency increased by 32 percentage points to 54%. Supply-chain and contingent business interruption dependency review is recommended.",
       whyItMatters:
         "A disruption at a concentrated supplier can affect production and revenue recovery.",
       evidenceIds: [
@@ -322,7 +322,7 @@ function evaluateFindings(
       summary:
         "Three critical cloud dependencies are now recorded, but supplied cyber evidence describes only the original AWS environment.",
       simpleExplanation:
-        "You added two important cloud services. We do not have enough current insurance and control evidence to tell how they should be reviewed.",
+        "You added two important cloud services. We do not have enough current insurance and control information to complete this check.",
       insuranceExplanation:
         "Critical technology dependency changed from one to three. Current cyber and business-interruption evidence is incomplete for the additional dependencies; no protection-gap conclusion was made.",
       whyItMatters:

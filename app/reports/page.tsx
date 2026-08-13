@@ -13,6 +13,10 @@ import { StatusBadge } from "@/components/status-badge";
 import { useDemo } from "@/components/demo-provider";
 import { ViewLens } from "@/components/view-lens";
 import { brand } from "@/domain/brand";
+import {
+  challengeOutcomeLabel,
+  protectionDomainLabel,
+} from "@/domain/language/insurance-language";
 
 export default function ReportsPage() {
   const { assessment, eventIds, reviews, lens } = useDemo();
@@ -27,7 +31,7 @@ export default function ReportsPage() {
       summary:
         assessment.findings.length > 0
           ? `${assessment.findings.length} ${assessment.findings.length === 1 ? "item needs" : "items need"} attention. The report explains what changed, why it matters and what to do next.`
-          : "The information supplied matches the evaluated baseline areas. No selected change currently needs review.",
+          : "The information supplied supports alignment for the evaluated baseline areas. No selected change currently needs review.",
       domainLabel: "Areas checked",
       findingLabel: "What needs attention",
     },
@@ -123,7 +127,7 @@ export default function ReportsPage() {
               <div className="report-domain-list">
                 {assessment.domains.map((domain) => (
                   <div key={domain.domain}>
-                    <strong>{domain.domain.replaceAll("_", " ")}</strong>
+                    <strong>{protectionDomainLabel(domain.domain)}</strong>
                     <StatusBadge state={domain.state} compact />
                   </div>
                 ))}
@@ -141,7 +145,7 @@ export default function ReportsPage() {
                       ? finding.simpleExplanation
                       : lens === "insurance"
                         ? finding.insuranceExplanation
-                        : `${finding.evidenceIds.length} linked artifacts · ${finding.ruleTrace.ruleId} v${finding.ruleTrace.ruleVersion} · Challenge ${finding.challenge.outcome.replaceAll("_", " ")}`}
+                        : `${finding.evidenceIds.length} linked artifacts · ${finding.ruleTrace.ruleId} v${finding.ruleTrace.ruleVersion} · Challenge: ${challengeOutcomeLabel(finding.challenge.outcome)}`}
                   </span>
                 </div>
               ))

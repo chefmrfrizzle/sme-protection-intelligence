@@ -632,6 +632,301 @@ p {
   width: 100%;
 }
 
+/* Language guide */
+.language-boundary {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: start;
+  gap: 13px;
+  border: 1px solid #c9ddd8;
+  border-radius: var(--radius);
+  background: linear-gradient(120deg, #edf8f5, #fbfdfc);
+  padding: 19px 21px;
+  color: var(--accent-dark);
+}
+
+.language-boundary strong {
+  display: block;
+  margin-bottom: 3px;
+  color: var(--ink);
+}
+
+.language-boundary p {
+  max-width: 900px;
+  margin: 0;
+  color: var(--ink-soft);
+  font-size: 12px;
+}
+
+.glossary-controls {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(280px, 0.7fr);
+  align-items: end;
+  gap: 30px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: rgba(255, 255, 255, 0.88);
+  padding: 23px;
+}
+
+.perspective-tabs {
+  display: inline-flex;
+  gap: 4px;
+  border: 1px solid var(--line-strong);
+  border-radius: 10px;
+  background: var(--canvas);
+  padding: 4px;
+}
+
+.perspective-tabs button {
+  min-height: 36px;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  padding: 7px 13px;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 650;
+}
+
+.perspective-tabs button.active {
+  background: var(--ink);
+  color: white;
+}
+
+.perspective-intro {
+  max-width: 650px;
+  margin: 10px 0 0;
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.glossary-search > span {
+  display: block;
+  margin-bottom: 7px;
+  color: var(--ink-soft);
+  font-size: 10px;
+  font-weight: 680;
+}
+
+.glossary-search > div {
+  display: flex;
+  min-height: 42px;
+  align-items: center;
+  gap: 9px;
+  border: 1px solid var(--line-strong);
+  border-radius: 9px;
+  background: white;
+  padding: 0 12px;
+  color: var(--muted);
+}
+
+.glossary-search input {
+  width: 100%;
+  min-width: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--ink);
+  font-size: 12px;
+}
+
+.category-filter {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.category-filter button {
+  min-height: 34px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.7);
+  padding: 6px 11px;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 10px;
+  font-weight: 650;
+}
+
+.category-filter button:hover,
+.category-filter button.active {
+  border-color: #b9d6d0;
+  background: var(--accent-pale);
+  color: var(--accent-dark);
+}
+
+.glossary-results-heading > span {
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.glossary-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 13px;
+}
+
+.glossary-entry {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  content-visibility: auto;
+  contain-intrinsic-size: 270px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: rgba(255, 255, 255, 0.9);
+  padding: 21px;
+  scroll-margin-top: 30px;
+}
+
+.glossary-entry header > span,
+.glossary-definition > span,
+.entry-sources > span {
+  display: block;
+  margin-bottom: 5px;
+  color: var(--accent-dark);
+  font-size: 8.5px;
+  font-weight: 730;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+
+.glossary-entry h3 {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-bottom: 18px;
+  font-size: 1.15rem;
+}
+
+.glossary-entry h3 small {
+  border-radius: 999px;
+  background: var(--canvas-deep);
+  padding: 3px 7px;
+  color: var(--muted);
+  font-size: 8px;
+  letter-spacing: 0.06em;
+}
+
+.glossary-definition {
+  flex: 1;
+}
+
+.glossary-definition p {
+  margin-bottom: 17px;
+  color: var(--ink);
+  font-size: 12.5px;
+}
+
+.language-guardrail {
+  border-left: 2px solid #e6c6c1;
+  background: #fff8f6;
+  padding: 10px 12px;
+}
+
+.language-guardrail strong {
+  display: block;
+  margin-bottom: 2px;
+  color: var(--danger);
+  font-size: 9px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.language-guardrail p {
+  margin: 0;
+  color: var(--ink-soft);
+  font-size: 10.5px;
+}
+
+.entry-sources {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 16px;
+  border-top: 1px solid var(--line);
+  padding-top: 13px;
+}
+
+.entry-sources > span {
+  width: 100%;
+}
+
+.entry-sources a {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--accent-dark);
+  font-size: 9.5px;
+  font-weight: 630;
+}
+
+.glossary-empty {
+  border: 1px dashed var(--line-strong);
+  border-radius: var(--radius);
+  padding: 50px 20px;
+  color: var(--muted);
+  text-align: center;
+}
+
+.glossary-empty h2 {
+  margin: 12px 0 4px;
+  color: var(--ink);
+}
+
+.glossary-empty p {
+  margin: 0;
+}
+
+.source-register {
+  display: grid;
+  grid-template-columns: minmax(260px, 0.7fr) minmax(0, 1.3fr);
+  gap: 32px;
+  border-radius: 18px;
+  background: var(--ink);
+  padding: 29px;
+  color: white;
+  scroll-margin-top: 30px;
+}
+
+.source-register h2 {
+  color: white;
+}
+
+.source-register p:not(.eyebrow) {
+  margin: 0;
+  color: #b9c6c4;
+  font-size: 11px;
+}
+
+.source-link-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 7px;
+}
+
+.source-link-grid a {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  border: 1px solid #334a47;
+  border-radius: 9px;
+  background: #192b29;
+  padding: 10px 12px;
+  color: #dce5e3;
+  font-size: 9.5px;
+}
+
+.source-link-grid a:hover {
+  border-color: #52726d;
+  background: #203532;
+}
+
 .domain-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -1205,6 +1500,13 @@ p {
 
 .finding-page .page-header h1 {
   max-width: 800px;
+}
+
+.finding-language-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
 }
 
 .lens-tabs {
@@ -2884,6 +3186,10 @@ p {
   .case-summary-card dl {
     grid-template-columns: repeat(3, 1fr);
   }
+  .glossary-controls,
+  .source-register {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (max-width: 620px) {
@@ -3095,6 +3401,27 @@ p {
   }
   .case-finding > header {
     flex-direction: column;
+  }
+  .finding-language-controls {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+  .glossary-grid,
+  .source-link-grid {
+    grid-template-columns: 1fr;
+  }
+  .perspective-tabs {
+    display: flex;
+    width: 100%;
+  }
+  .perspective-tabs button {
+    min-width: 0;
+    flex: 1;
+  }
+  .glossary-controls,
+  .glossary-entry,
+  .source-register {
+    padding: 18px;
   }
 }
 

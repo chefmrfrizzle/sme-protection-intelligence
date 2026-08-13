@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowRight, CheckCircle2, Info } from "lucide-react";
+import { ArrowRight, BookOpenText, CheckCircle2, Info } from "lucide-react";
 import { AlignmentRing } from "@/components/alignment-ring";
 import { DomainCard, domainName } from "@/components/domain-card";
 import { PageHeader } from "@/components/page-header";
@@ -33,7 +33,14 @@ export default function ProtectionPage() {
         eyebrow={assessment.label}
         title="Protection profile"
         description={profileCopy}
-        actions={<ViewLens />}
+        actions={
+          <div className="page-control-row">
+            <ViewLens />
+            <Link className="button secondary" href="/glossary">
+              <BookOpenText size={15} /> Language guide
+            </Link>
+          </div>
+        }
       />
       <section className="profile-summary">
         <AlignmentRing value={assessment.alignment} size="small" />
@@ -41,7 +48,7 @@ export default function ProtectionPage() {
           <h2>{assessment.alignment}% evidence-aligned</h2>
           <p>
             {lens === "simple"
-              ? "How closely your current business information matches the protection records supplied."
+              ? "How closely the current business information supports alignment with the protection records supplied."
               : lens === "insurance"
                 ? "60% explicit alignment state plus 40% evidence completeness across four in-scope domains."
                 : `${evidencePresent} of ${evidenceRequired} required evidence checks are currently available.`}

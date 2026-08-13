@@ -35,7 +35,7 @@ test("reset-to-report storyline is deterministic and reviewable", async ({
   }
 
   await expect(
-    page.getByText("Potential gap", { exact: true }).first(),
+    page.getByText("Potential protection gap", { exact: true }).first(),
   ).toBeVisible();
   await expect(
     page
@@ -51,7 +51,7 @@ test("reset-to-report storyline is deterministic and reviewable", async ({
 
   await page.getByRole("tab", { name: "Insurance" }).first().click();
   await expect(
-    page.getByRole("heading", { name: "SURVIVES" }).first(),
+    page.getByRole("heading", { name: "Finding remains for review" }).first(),
   ).toBeVisible();
   await expect(
     page.getByText(/possible scheduled-location mismatch/i).first(),
@@ -65,7 +65,7 @@ test("reset-to-report storyline is deterministic and reviewable", async ({
 
   await page.getByTestId("request-review").first().click();
   await expect(
-    page.getByText("REVIEWING", { exact: true }).first(),
+    page.getByText("Professional review in progress", { exact: true }).first(),
   ).toBeVisible();
   await page.getByRole("link", { name: "Open review case" }).click();
   await expect(
@@ -73,7 +73,7 @@ test("reset-to-report storyline is deterministic and reviewable", async ({
   ).toBeVisible();
   await expect(page.getByText(/Mock adapter · Not connected/i)).toBeVisible();
   await expect(
-    page.getByText("READY FOR PROFESSIONAL REVIEW", { exact: true }),
+    page.getByText("Ready for professional review", { exact: true }),
   ).toBeVisible();
 
   await page.goto("/changes");
@@ -260,4 +260,42 @@ test("control centre explains readiness without making live or coverage claims",
     page.getByText("Make an insurance or legal decision").first(),
   ).toBeVisible();
   await expect(page.getByText("BN-08").first()).toBeVisible();
+});
+
+test("language guide explains terms across three perspectives", async ({
+  page,
+}) => {
+  await page.goto("/glossary");
+  await expect(
+    page.getByRole("heading", { name: "Protection and insurance glossary" }),
+  ).toBeVisible();
+  await expect(
+    page
+      .getByRole("region", { name: "Language boundary" })
+      .getByText("Working definitions, not policy definitions", { exact: true })
+      .first(),
+  ).toBeVisible();
+
+  await page.getByRole("tab", { name: "Presenter cue" }).click();
+  await expect(
+    page.getByText(/the system tries to prove itself wrong/i),
+  ).toBeVisible();
+
+  const glossarySearch = page
+    .getByRole("main")
+    .getByRole("searchbox", { name: "Search the language guide" })
+    .first();
+  await glossarySearch.fill("contingent");
+  await expect(
+    page.getByRole("heading", { name: /Contingent business interruption/ }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "1 matching term" }),
+  ).toBeVisible();
+
+  await glossarySearch.fill("");
+  await page.getByRole("button", { name: "Assessment state" }).click();
+  await expect(
+    page.getByRole("heading", { name: "7 matching terms" }),
+  ).toBeVisible();
 });

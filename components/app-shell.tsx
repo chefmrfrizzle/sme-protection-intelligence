@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   Activity,
+  BookOpenText,
   Boxes,
   ClipboardCheck,
   Cog,
@@ -32,6 +33,7 @@ const primaryNavigation = [
 ] as const;
 
 const secondaryNavigation = [
+  { href: "/glossary", label: "Language guide", icon: BookOpenText },
   { href: "/controls", label: "Control centre", icon: Cog },
   { href: "/simulator", label: "Scenario simulator", icon: FlaskConical },
   { href: "/audit", label: "View audit trail", icon: History },

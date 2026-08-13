@@ -5,6 +5,11 @@ import { brand } from "../brand";
 import { demoCompany } from "@/demo/company";
 import { evidenceArtifacts } from "@/demo/evidence";
 import { eventPresentation } from "@/demo/events";
+import {
+  protectionDomainLabel,
+  reviewStatusLabel,
+  stateLabel,
+} from "../language/insurance-language";
 
 const PAGE = { width: 595.28, height: 841.89, margin: 52 };
 const colors = {
@@ -179,7 +184,7 @@ function findingBlock(
     borderColor: colors.line,
     borderWidth: 0.5,
   });
-  next.page.drawText(finding.state.replaceAll("_", " "), {
+  next.page.drawText(stateLabel(finding.state).toUpperCase(), {
     x: PAGE.margin + 14,
     y: next.y - 5,
     size: 7.5,
@@ -287,7 +292,7 @@ export async function createAssessmentPdf(
   context = paragraph(
     context,
     assessment,
-    `${assessment.appliedEventIds.length} material operating changes have occurred since the baseline assessment. ${potentialGaps} potential protection gap has been identified, ${reviewItems} exposure items require review, and ${incomplete} assessment remains incomplete because supporting evidence was not available.`,
+    `${assessment.appliedEventIds.length} material operating change${assessment.appliedEventIds.length === 1 ? " has" : "s have"} occurred since the baseline assessment. ${potentialGaps} potential protection gap${potentialGaps === 1 ? " has" : "s have"} been identified, ${reviewItems} exposure item${reviewItems === 1 ? " requires" : "s require"} review, and ${incomplete} assessment${incomplete === 1 ? " remains" : "s remain"} incomplete because supporting evidence was not available.`,
     { size: 11, gap: 18 },
   );
 
@@ -331,14 +336,14 @@ export async function createAssessmentPdf(
   );
   for (const domain of assessment.domains) {
     context = ensure(context, assessment, 40);
-    context.page.drawText(domain.domain.replaceAll("_", " "), {
+    context.page.drawText(protectionDomainLabel(domain.domain).toUpperCase(), {
       x: PAGE.margin,
       y: context.y,
       size: 9,
       font: bold,
       color: colors.ink,
     });
-    context.page.drawText(domain.state.replaceAll("_", " "), {
+    context.page.drawText(stateLabel(domain.state).toUpperCase(), {
       x: PAGE.margin + 175,
       y: context.y,
       size: 8,
@@ -475,7 +480,7 @@ export async function createAssessmentPdf(
       ? assessment.findings
           .map(
             (finding) =>
-              `${finding.title}: ${finding.reviewStatus.replaceAll("_", " ")}`,
+              `${finding.title}: ${reviewStatusLabel(finding.reviewStatus)}`,
           )
           .join(". ")
       : "No open finding requires professional disposition in the baseline assessment.",

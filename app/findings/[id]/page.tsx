@@ -11,6 +11,7 @@ import {
   FileCheck2,
   SearchCheck,
   Send,
+  BookOpenText,
 } from "lucide-react";
 import { Disclaimer } from "@/components/disclaimer";
 import { useDemo } from "@/components/demo-provider";
@@ -19,6 +20,12 @@ import { StatusBadge } from "@/components/status-badge";
 import { ViewLens } from "@/components/view-lens";
 import { evidenceById } from "@/demo/evidence";
 import { minimumEvidenceRequest } from "@/domain/evidence/completeness";
+import {
+  challengeOutcomeLabel,
+  protectionDomainLabel,
+  reviewStatusLabel,
+  stateLabel,
+} from "@/domain/language/insurance-language";
 
 export default function FindingDetailPage() {
   const params = useParams<{ id: string }>();
@@ -65,13 +72,22 @@ export default function FindingDetailPage() {
         <ArrowLeft size={15} /> Back to protection
       </Link>
       <PageHeader
-        eyebrow={`Protection / ${finding.domain.replaceAll("_", " ")} / Assessment v${assessment.version}`}
+        eyebrow={`Protection / ${protectionDomainLabel(finding.domain)} / Assessment v${assessment.version}`}
         title={finding.title}
         description={finding.summary}
         actions={<StatusBadge state={finding.state} />}
       />
 
-      <ViewLens label="Finding explanation lens" />
+      <div className="finding-language-controls">
+        <ViewLens label="Finding explanation lens" />
+        <Link
+          className="text-link"
+          href={`/glossary#state-${finding.state.toLowerCase().replaceAll("_", "-")}`}
+        >
+          <BookOpenText size={14} /> What does “{stateLabel(finding.state)}”
+          mean?
+        </Link>
+      </div>
 
       <section className="lens-panel" role="tabpanel">
         {lens === "simple" ? (
@@ -131,7 +147,7 @@ export default function FindingDetailPage() {
                   ? finding.simpleExplanation
                   : lens === "insurance"
                     ? finding.insuranceExplanation
-                    : `${finding.ruleTrace.ruleId} produced ${finding.state.replaceAll("_", " ")}`}
+                    : `${finding.ruleTrace.ruleId} produced ${stateLabel(finding.state)}`}
               </h2>
               <p>
                 {lens === "evidence"
@@ -198,7 +214,7 @@ export default function FindingDetailPage() {
               <h2>
                 {lens === "simple" && finding.challenge.outcome === "SURVIVES"
                   ? "The item still needs review"
-                  : finding.challenge.outcome.replaceAll("_", " ")}
+                  : challengeOutcomeLabel(finding.challenge.outcome)}
               </h2>
               <p>
                 {lens === "simple" && finding.challenge.outcome === "SURVIVES"
@@ -263,7 +279,7 @@ export default function FindingDetailPage() {
           <dl>
             <div>
               <dt>Status</dt>
-              <dd>{finding.reviewStatus.replaceAll("_", " ")}</dd>
+              <dd>{reviewStatusLabel(finding.reviewStatus)}</dd>
             </div>
             <div>
               <dt>Owner</dt>

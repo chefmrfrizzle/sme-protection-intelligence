@@ -14,6 +14,8 @@ This application is decision support only. It does not determine, confirm, deny,
 - source-linked evidence and conflict-aware provenance;
 - adversarial Coverage Challenge Pass for every candidate gap;
 - Simple, Insurance, and Evidence explanation lenses;
+- a three-perspective insurance language guide with product guardrails and
+  authoritative terminology references;
 - Protection Diff, event timeline, scenario simulator, human review, and append-only audit history;
 - replayed validated AI extraction behind a typed agent harness;
 - downloadable professional PDF report and reproducible assessment receipt;
@@ -91,7 +93,8 @@ receipt, audit event, and queued job. See
 ## Repository map
 
 See [Architecture](docs/ARCHITECTURE.md), [Algorithms](docs/ALGORITHMS.md),
-[Implementation Plan](docs/IMPLEMENTATION_PLAN.md), and
+[Implementation Plan](docs/IMPLEMENTATION_PLAN.md),
+[Insurance Language Guide](docs/INSURANCE_LANGUAGE_GUIDE.md), and
 [Backend Setup](docs/BACKEND_SETUP.md). Engineering and safety constraints are
 in [AGENTS.md](AGENTS.md).
 

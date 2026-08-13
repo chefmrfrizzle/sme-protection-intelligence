@@ -38,7 +38,7 @@ export default function OverviewPage() {
   );
   const alignmentCopy = {
     simple:
-      "How closely the information you supplied matches the way your business operates today.",
+      "How closely the supplied protection information supports alignment with the way your business operates today.",
     insurance:
       "Deterministic alignment and evidence completeness across the four protection domains in scope.",
     evidence: `${evidencePresent} of ${evidenceRequired} required checks currently have supporting information.`,
