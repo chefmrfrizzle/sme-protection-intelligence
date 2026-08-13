@@ -63,6 +63,9 @@ export type ReportRecord = {
   contentHash: string;
   evidenceSnapshotId: string;
   rulesetVersion: string;
+  configurationVersion: string;
+  reviewEventIds: string[];
+  receiptHash: string;
 };
 
 export interface ReportRepository {

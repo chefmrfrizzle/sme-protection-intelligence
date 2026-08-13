@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { OrganizationRoleSchema } from "./authorization";
 
 export const ProtectionStateSchema = z.enum([
   "ALIGNED",
@@ -20,10 +21,10 @@ export const ProtectionDomainSchema = z.enum([
 export const ReviewStatusSchema = z.enum([
   "OPEN",
   "REVIEWING",
-  "CONFIRMED",
   "DISMISSED",
   "MORE_EVIDENCE_REQUESTED",
   "ESCALATED",
+  "REVIEW_COMPLETED_NO_COVERAGE_DECISION",
 ]);
 
 export const ReviewCommandSchema = z.object({
@@ -34,7 +35,7 @@ export const ReviewCommandSchema = z.object({
   status: ReviewStatusSchema,
   reviewer: z.object({
     displayName: z.string().min(1).max(120),
-    role: z.enum(["SME_USER", "BROKER_RISK_ADVISOR", "INSURER_REVIEWER"]),
+    role: OrganizationRoleSchema,
   }),
   rationale: z.string().max(1_000).optional(),
   idempotencyKey: z.string().min(8).max(160),
@@ -200,7 +201,7 @@ export const ReviewReceiptSchema = z.object({
     findingId: z.string().min(1),
     status: ReviewStatusSchema,
     reviewer: z.string().min(1),
-    role: z.enum(["SME_USER", "BROKER_RISK_ADVISOR", "INSURER_REVIEWER"]),
+    role: OrganizationRoleSchema,
     rationale: z.string().optional(),
     occurredAt: z.string().datetime(),
     idempotencyKey: z.string().min(8),
