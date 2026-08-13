@@ -27,6 +27,8 @@ This application is decision support only. It does not determine, confirm, deny,
   receipts, retention/legal-hold gates, and erasure tombstones when configured;
 - append-only temporal fact candidates, source spans, conflicts, corrections,
   and a fact-snapshot adapter for deterministic reconciliation;
+- a transactional outbox with allowlisted HTTPS delivery, DNS/IP SSRF checks,
+  signed idempotent payloads, bounded retries, dead letters, and audited replay;
 - resettable, third-party-independent demo mode.
 
 All company, person, policy, financial, asset, supplier, infrastructure, and document data is synthetic.

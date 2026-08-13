@@ -2495,6 +2495,96 @@ p {
   text-align: right;
 }
 
+.controls-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.control-card {
+  min-height: 230px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: white;
+  padding: 20px;
+}
+
+.control-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 18px;
+}
+
+.control-icon {
+  display: grid;
+  width: 36px;
+  height: 36px;
+  place-items: center;
+  border-radius: 10px;
+  background: var(--accent-pale);
+  color: var(--accent-dark);
+}
+
+.control-id {
+  color: var(--muted);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 8px;
+  font-weight: 700;
+}
+
+.control-card h2 {
+  margin-bottom: 10px;
+  font-size: 1rem;
+}
+
+.control-card p {
+  margin: 13px 0 0;
+  color: var(--ink-soft);
+  font-size: 9.5px;
+  line-height: 1.65;
+}
+
+.readiness-badge {
+  display: inline-flex;
+  border: 1px solid var(--accent-line);
+  border-radius: 999px;
+  background: var(--accent-pale);
+  padding: 5px 8px;
+  color: var(--accent-dark);
+  font-size: 7px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+}
+
+.control-boundary {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.control-boundary > div {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: white;
+  padding: 22px;
+}
+
+.control-boundary > div:last-child {
+  border-color: var(--warning-line);
+  background: var(--warning-pale);
+}
+
+.control-boundary h2 {
+  font-size: 1.15rem;
+}
+
+.control-boundary p:last-child {
+  margin-bottom: 0;
+  color: var(--ink-soft);
+  font-size: 10px;
+}
+
 .payload-preview summary {
   color: var(--accent-dark);
   cursor: pointer;
@@ -2660,6 +2750,9 @@ p {
   .finding-layout {
     grid-template-columns: 1fr;
   }
+  .controls-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
   .review-panel {
     position: static;
   }
@@ -2822,6 +2915,10 @@ p {
   .evidence-summary-grid,
   .scenario-grid {
     grid-template-columns: 1fr 1fr;
+  }
+  .controls-grid,
+  .control-boundary {
+    grid-template-columns: 1fr;
   }
   .metric-card {
     min-height: 105px;

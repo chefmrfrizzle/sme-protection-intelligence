@@ -244,3 +244,20 @@ test("public demo exposes optional sign-in without exposing a session", async ({
   ).toBeVisible();
   await expect(page.getByText("No password is stored")).toBeVisible();
 });
+
+test("control centre explains readiness without making live or coverage claims", async ({
+  page,
+}) => {
+  await page.goto("/controls");
+  await expect(
+    page.getByRole("heading", { name: "Control centre" }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "Core trust substrate built" }).first(),
+  ).toBeVisible();
+  await expect(page.getByText("Live claims").first()).toBeVisible();
+  await expect(
+    page.getByText("Make an insurance or legal decision").first(),
+  ).toBeVisible();
+  await expect(page.getByText("BN-08").first()).toBeVisible();
+});

@@ -176,6 +176,39 @@ export const postgresRepositories: ProtectionRepositories = {
               ${auditEvent.snapshotHash}, ${auditEvent.occurredAt}
             )
           `;
+          const endpoint = await transaction`
+            select id::text
+            from integration_endpoints
+            where organization_id = ${scope.organizationId}
+              and status = 'ACTIVE'
+            order by created_at
+            limit 1
+          `;
+          const outboxId = randomUUID();
+          const idempotencyKey = `${scope.organizationId}:review:${review.id}`;
+          const payload = {
+            schemaVersion: "protection-review-case/1.0",
+            deliveryId: outboxId,
+            organizationId: scope.organizationId,
+            assessmentId: review.assessmentId,
+            findingId: review.findingId,
+            reviewState: review.status,
+            allowedActions: ["ROUTE_FOR_REVIEW", "REQUEST_EVIDENCE", "ABSTAIN"],
+            synthetic: true,
+          };
+          await transaction`
+            insert into outbox_events (
+              organization_id, id, endpoint_id, aggregate_type, aggregate_id,
+              event_type, schema_version, idempotency_key, correlation_id,
+              payload, status, attempts, max_attempts, available_at, receipt_hash
+            ) values (
+              ${scope.organizationId}, ${outboxId}, ${endpoint[0]?.id ?? null},
+              'REVIEW', ${review.id}, 'PROFESSIONAL_REVIEW_STATE_CHANGED',
+              'protection-review-case/1.0', ${idempotencyKey},
+              ${review.assessmentId}, ${transaction.json(payload)}, 'PENDING',
+              0, 5, now(), ${receiptHash({ payload, idempotencyKey })}
+            )
+          `;
         }
         return ReviewReceiptSchema.parse({
           accepted: true,

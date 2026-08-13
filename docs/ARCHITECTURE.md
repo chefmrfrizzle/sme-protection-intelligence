@@ -45,6 +45,7 @@ Connector / upload -> signed intake API -> object storage
   -> queued extraction harness -> validated facts + provenance
   -> append-only event store -> reconciliation worker
   -> assessment/read model -> web application / broker review / reports
+  -> transactional outbox -> signed allowlisted webhook / retry / dead letter
 ```
 
 Recommended production controls:
