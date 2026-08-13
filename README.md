@@ -22,7 +22,11 @@ This application is decision support only. It does not determine, confirm, deny,
 - optional passwordless sign-in for a saved demonstration workspace;
 - a validated review API (`POST /api/reviews`) with durable signed-in receipts;
 - tenant-scoped PostgreSQL persistence with Supabase Auth and row-level security;
-- a private evidence bucket for future PDF/document intake;
+- governed synthetic evidence upload/download with quarantine, MIME and size
+  checks, SHA-256, deterministic scanner tests, immutable versions, access
+  receipts, retention/legal-hold gates, and erasure tombstones when configured;
+- append-only temporal fact candidates, source spans, conflicts, corrections,
+  and a fact-snapshot adapter for deterministic reconciliation;
 - resettable, third-party-independent demo mode.
 
 All company, person, policy, financial, asset, supplier, infrastructure, and document data is synthetic.
@@ -116,9 +120,11 @@ public demonstration. Supabase is used only by the optional signed-in workspace.
   tenant membership checks, append-only tables, and `POSTGRES` receipts.
 - Every application table has row-level security. Anonymous Data API reads are
   revoked, and the evidence bucket is private.
-- This is still a synthetic prototype. Real SME data requires retention/deletion
-  workflows, monitoring, backups, role onboarding, signed document delivery, and
-  independent security/privacy/legal review.
+- The included evidence scanner is a deterministic synthetic-test adapter, not a
+  production malware-scanning service.
+- This is still a synthetic prototype. Real SME data remains prohibited until an
+  approved scanner, policies, monitoring, backups, target-region validation, and
+  independent security/privacy/legal review are in place.
 
 ## AI boundary
 

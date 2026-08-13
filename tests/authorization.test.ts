@@ -13,6 +13,7 @@ describe("role authorization", () => {
 
   it("keeps privileged integration and replay actions admin-only", () => {
     expect(permissionsFor("ADMIN")).toContain("CONFIGURE_INTEGRATIONS");
+    expect(permissionsFor("ADMIN")).toContain("ERASE_EVIDENCE");
     expect(() =>
       assertAuthorized("INSURER_REVIEWER", "REPLAY_OUTBOUND"),
     ).toThrow(/not authorized/i);

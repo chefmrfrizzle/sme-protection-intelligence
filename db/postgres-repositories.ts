@@ -57,6 +57,13 @@ async function ensureMembership(
   return role;
 }
 
+export async function authorizeDatabaseScope(
+  scope: TenantScope,
+  action: ProtectedAction,
+) {
+  return ensureMembership(getDatabase(), scope, action);
+}
+
 function toIso(value: unknown) {
   return value instanceof Date ? value.toISOString() : String(value);
 }

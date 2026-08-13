@@ -15,6 +15,7 @@ export const ProtectedActionSchema = z.enum([
   "CONFIGURE_INTEGRATIONS",
   "PROMOTE_FACT",
   "REPLAY_OUTBOUND",
+  "ERASE_EVIDENCE",
 ]);
 
 export type OrganizationRole = z.infer<typeof OrganizationRoleSchema>;
@@ -42,6 +43,7 @@ const rolePermissions = {
     "CONFIGURE_INTEGRATIONS",
     "PROMOTE_FACT",
     "REPLAY_OUTBOUND",
+    "ERASE_EVIDENCE",
   ],
 } as const satisfies Record<OrganizationRole, readonly ProtectedAction[]>;
 
