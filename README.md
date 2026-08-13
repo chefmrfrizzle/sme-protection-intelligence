@@ -16,6 +16,8 @@ This application is decision support only. It does not determine, confirm, deny,
 - Simple, Insurance, and Evidence explanation lenses;
 - a three-perspective insurance language guide with product guardrails and
   authoritative terminology references;
+- an exact three-minute presenter rehearsal with timed cues, insurance-safe
+  narration, click instructions, and fallback actions;
 - Protection Diff, event timeline, scenario simulator, human review, and append-only audit history;
 - replayed validated AI extraction behind a typed agent harness;
 - downloadable professional PDF report and reproducible assessment receipt;
@@ -61,14 +63,14 @@ This runs formatting checks, lint, typecheck, unit/golden tests, production buil
 
 ## Demo rehearsal
 
-1. Reset to Protection Profile v1 on Overview.
-2. Open Changes and apply **New warehouse**.
-3. Open the new-location finding and inspect Simple, Insurance, and Evidence lenses.
-4. Open the source excerpts and Coverage Challenge result.
-5. Apply **Cloud dependency** and show `EVIDENCE_INCOMPLETE` abstention.
-6. Request professional review.
-7. Open Reports and download the assessment PDF.
-8. Open the audit trail and compare assessment versions.
+Open `/rehearsal` and click **Start timed rehearsal**. A persistent presenter
+coach follows the production flow and provides the exact narration, click,
+approved phrase, timer, and fallback for every scene. The run rehearses reset →
+warehouse change → finding → evidence → challenge → abstention → professional
+review → PDF → audit trail in exactly three minutes.
+
+The printable run-of-show is in
+[Three-Minute Demo](docs/THREE_MINUTE_DEMO.md).
 
 ## Canonical event API
 
@@ -94,7 +96,8 @@ receipt, audit event, and queued job. See
 
 See [Architecture](docs/ARCHITECTURE.md), [Algorithms](docs/ALGORITHMS.md),
 [Implementation Plan](docs/IMPLEMENTATION_PLAN.md),
-[Insurance Language Guide](docs/INSURANCE_LANGUAGE_GUIDE.md), and
+[Insurance Language Guide](docs/INSURANCE_LANGUAGE_GUIDE.md),
+[Three-Minute Demo](docs/THREE_MINUTE_DEMO.md), and
 [Backend Setup](docs/BACKEND_SETUP.md). Engineering and safety constraints are
 in [AGENTS.md](AGENTS.md).
 

@@ -89,7 +89,7 @@ export default function FindingDetailPage() {
         </Link>
       </div>
 
-      <section className="lens-panel" role="tabpanel">
+      <section className="lens-panel" role="tabpanel" id="finding-explanation">
         {lens === "simple" ? (
           <>
             <p className="eyebrow">In plain English</p>
@@ -157,7 +157,7 @@ export default function FindingDetailPage() {
             </div>
           </section>
 
-          <section className="detail-section">
+          <section className="detail-section" id="evidence-provenance">
             <span className="step-number">02</span>
             <div className="wide-content">
               <p className="eyebrow">
@@ -199,7 +199,7 @@ export default function FindingDetailPage() {
             </div>
           </section>
 
-          <section className="challenge-card">
+          <section className="challenge-card" id="coverage-challenge">
             <div className="challenge-icon">
               <SearchCheck aria-hidden="true" size={22} />
             </div>
@@ -264,7 +264,7 @@ export default function FindingDetailPage() {
           </section>
         </div>
 
-        <aside className="review-panel">
+        <aside className="review-panel" id="professional-review">
           <p className="eyebrow">Human review</p>
           <h2>
             {lens === "simple"

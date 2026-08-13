@@ -178,6 +178,118 @@ test("scenario selections are reversible and explanation view persists", async (
   );
 });
 
+test("rehearsal coach drives the exact reset-to-audit presentation", async ({
+  page,
+}) => {
+  await page.goto("/rehearsal");
+  await expect(
+    page.getByRole("heading", { name: "Three-minute demo rehearsal" }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: "Start timed rehearsal" }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("main").getByText("Exact runtime").first(),
+  ).toBeVisible();
+  await expect(page.getByText("3:00", { exact: true }).first()).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: /^Open cue \d+:/ }),
+  ).toHaveCount(10);
+
+  await page.getByRole("button", { name: "Practice untimed" }).click();
+  await expect(page).toHaveURL(/\/overview$/);
+  await expect(page.getByTestId("rehearsal-dock")).toBeVisible();
+  await expect(
+    page.getByTestId("rehearsal-dock").getByText("Reset and frame the problem"),
+  ).toBeVisible();
+  await page.getByTestId("rehearsal-open-scene").click();
+  await expect(
+    page
+      .getByRole("main")
+      .getByRole("heading", { name: "100% evidence-aligned", exact: true })
+      .first(),
+  ).toBeVisible();
+
+  await page.getByTestId("rehearsal-next").click();
+  await page.getByTestId("rehearsal-next").click();
+  await expect(
+    page.getByTestId("rehearsal-dock").getByText("Apply the warehouse change"),
+  ).toBeVisible();
+  await page.getByTestId("rehearsal-open-scene").click();
+  await expect(
+    page
+      .getByText("New location may require protection review", { exact: true })
+      .first(),
+  ).toBeVisible();
+
+  await page.getByTestId("rehearsal-next").click();
+  await page.getByTestId("rehearsal-open-scene").click();
+  await expect(page).toHaveURL(/\/findings\/finding_new_location$/);
+  await expect(
+    page.getByText("Potential protection gap", { exact: true }).first(),
+  ).toBeVisible();
+
+  await page.getByTestId("rehearsal-next").click();
+  await page.getByTestId("rehearsal-open-scene").click();
+  await expect(page).toHaveURL(/#evidence-provenance$/);
+  await expect(page.getByRole("tab", { name: "Evidence" })).toHaveAttribute(
+    "aria-selected",
+    "true",
+  );
+
+  await page.getByTestId("rehearsal-next").click();
+  await page.getByTestId("rehearsal-open-scene").click();
+  await expect(page).toHaveURL(/#coverage-challenge$/);
+  await expect(page.getByRole("tab", { name: "Insurance" })).toHaveAttribute(
+    "aria-selected",
+    "true",
+  );
+  await expect(
+    page.getByRole("heading", { name: "Finding remains for review" }).first(),
+  ).toBeVisible();
+
+  await page.getByTestId("rehearsal-next").click();
+  await page.getByTestId("rehearsal-open-scene").click();
+  await expect(page).toHaveURL(/\/findings\/finding_cloud_dependency$/);
+  await expect(
+    page.getByText("Evidence incomplete", { exact: true }).first(),
+  ).toBeVisible();
+
+  await page.getByTestId("rehearsal-next").click();
+  await page.getByTestId("rehearsal-open-scene").click();
+  await expect(
+    page.getByRole("button", { name: "Expand rehearsal coach" }),
+  ).toBeVisible();
+  await page.getByTestId("request-review").click();
+  await expect(
+    page.getByText("Professional review in progress", { exact: true }).first(),
+  ).toBeVisible();
+  await page.getByRole("link", { name: "Open review case" }).click();
+  await expect(
+    page.getByRole("heading", { name: "Protection Review Case" }),
+  ).toBeVisible();
+
+  await page.getByRole("button", { name: "Expand rehearsal coach" }).click();
+  await page.getByTestId("rehearsal-next").click();
+  await page.getByTestId("rehearsal-open-scene").click();
+  await expect(page).toHaveURL(/\/reports$/);
+  await expect(page.getByTestId("download-report")).toBeVisible();
+  await expect(
+    page.getByText("Assessment v3 is source-linked and versioned"),
+  ).toBeVisible();
+
+  await page.getByRole("button", { name: "Expand rehearsal coach" }).click();
+  await page.getByTestId("rehearsal-next").click();
+  await page.getByTestId("rehearsal-open-scene").click();
+  await expect(page).toHaveURL(/\/audit$/);
+  await expect(
+    page.getByText("Profile v3", { exact: true }).first(),
+  ).toBeVisible();
+  await expect(
+    page.getByText("CHALLENGE PASS COMPLETED", { exact: true }).first(),
+  ).toBeVisible();
+});
+
 test("canonical event endpoint validates input without persisting it", async ({
   request,
 }) => {
