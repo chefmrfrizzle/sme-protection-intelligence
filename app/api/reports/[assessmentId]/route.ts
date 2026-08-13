@@ -2,7 +2,7 @@ import { NextRequest } from "next/server";
 import { z } from "zod";
 import { ReviewStatusSchema } from "@/domain/schemas";
 import { buildAssessment } from "@/domain/reconciliation/engine";
-import { demoHash } from "@/domain/reconciliation/hash";
+import { receiptHash } from "@/domain/crypto/receipts";
 import { createAssessmentPdf, reportContentHash } from "@/domain/report/pdf";
 import { applyTrustedReviewState } from "@/domain/report/trusted-state";
 import { CONFIGURATION_VERSION } from "@/domain/rules/config";
@@ -93,7 +93,7 @@ export async function GET(
   if (identity) await repositories.assessments.append(scope, assessment);
   const generatedAt = new Date().toISOString();
   const reviewEventIds = storedReviews.map((review) => review.id).sort();
-  const receiptHash = demoHash({
+  const reportReceiptHash = receiptHash({
     assessmentId: assessment.id,
     assessmentVersion: assessment.version,
     evidenceSnapshotId: assessment.evidenceSnapshotId,
@@ -112,7 +112,7 @@ export async function GET(
     rulesetVersion: assessment.rulesetVersion,
     configurationVersion: CONFIGURATION_VERSION,
     reviewEventIds,
-    receiptHash,
+    receiptHash: reportReceiptHash,
   });
   await repositories.audit.append(scope, {
     id: `audit_report_${assessment.id}_${contentHash.slice(-12)}`,
@@ -121,7 +121,7 @@ export async function GET(
     actor: identity?.email ?? "Synthetic demo user",
     occurredAt: generatedAt,
     summary: `Generated report for ${assessment.id}.`,
-    snapshotHash: receiptHash,
+    snapshotHash: reportReceiptHash,
   });
   return new Response(Buffer.from(bytes), {
     headers: {
@@ -129,7 +129,7 @@ export async function GET(
       "Content-Disposition": `attachment; filename="PRODUCT_Protection_Alignment_${assessment.id}.pdf"`,
       "Cache-Control": "private, no-store",
       "X-Assessment-Content-Hash": contentHash,
-      "X-Report-Receipt-Hash": receiptHash,
+      "X-Report-Receipt-Hash": reportReceiptHash,
       "X-Persistence-Mode": reportResult.storageMode,
     },
   });

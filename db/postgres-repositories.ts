@@ -2,7 +2,7 @@ import { randomUUID } from "node:crypto";
 import postgres, { type Sql } from "postgres";
 import { evidenceArtifacts } from "@/demo/evidence";
 import { buildAssessment } from "@/domain/reconciliation/engine";
-import { demoHash } from "@/domain/reconciliation/hash";
+import { receiptHash } from "@/domain/crypto/receipts";
 import { ReviewReceiptSchema } from "@/domain/schemas";
 import type { ReviewReceipt } from "@/domain/types";
 import {
@@ -86,7 +86,7 @@ export const postgresRepositories: ProtectionRepositories = {
             ${scope.organizationId}, ${assessment.id}, ${assessment.version},
             ${assessment.snapshotAt}, ${assessment.evidenceSnapshotId},
             ${assessment.rulesetVersion}, ${transaction.json(assessment)},
-            ${assessment.receiptHash}
+            ${receiptHash(assessment)}
           )
           on conflict (organization_id, assessment_id, version) do nothing
         `;
@@ -130,7 +130,7 @@ export const postgresRepositories: ProtectionRepositories = {
               ${scope.organizationId}, ${command.assessmentId}, ${command.findingId},
               ${command.status}, ${scope.actorUserId!}, ${trustedRole},
               ${command.rationale ?? null}, ${command.idempotencyKey}, ${occurredAt},
-              ${demoHash({ command, occurredAt, actor: scope.actorUserId })}
+              ${receiptHash({ command, occurredAt, actor: scope.actorUserId })}
             )
             returning id::text, organization_id, assessment_id, finding_id, status,
               reviewer_subject, reviewer_role, rationale, idempotency_key, occurred_at
@@ -155,7 +155,7 @@ export const postgresRepositories: ProtectionRepositories = {
           actor: `${review.reviewer} (${review.role})`,
           occurredAt: review.occurredAt,
           summary: `${review.findingId} moved to ${review.status}.`,
-          snapshotHash: demoHash(review),
+          snapshotHash: receiptHash(review),
         };
         if (!existing.length) {
           await transaction`
@@ -176,7 +176,7 @@ export const postgresRepositories: ProtectionRepositories = {
           storageMode: "POSTGRES",
           review,
           auditEvent,
-          receiptHash: demoHash({ review, auditEvent }),
+          receiptHash: receiptHash({ review, auditEvent }),
         });
       });
     },
@@ -217,7 +217,7 @@ export const postgresRepositories: ProtectionRepositories = {
         ) values (
           ${randomUUID()}, ${scope.organizationId}, ${event.eventType},
           ${scope.actorUserId!}, ${event.summary}, ${sql.json({ sourceId: event.id })},
-          ${event.snapshotHash}, ${event.occurredAt}
+          ${receiptHash(event)}, ${event.occurredAt}
         )
       `;
       return durableResult(event);

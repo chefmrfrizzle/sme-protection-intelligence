@@ -17,7 +17,8 @@ This application is decision support only. It does not determine, confirm, deny,
 - Protection Diff, event timeline, scenario simulator, human review, and append-only audit history;
 - replayed validated AI extraction behind a typed agent harness;
 - downloadable professional PDF report and reproducible assessment receipt;
-- a canonical structured event API (`POST /api/events`);
+- a canonical structured event API (`POST /api/events`) with a synthetic
+  unsigned preview and an optional signed, replay-resistant durable boundary;
 - optional passwordless sign-in for a saved demonstration workspace;
 - a validated review API (`POST /api/reviews`) with durable signed-in receipts;
 - tenant-scoped PostgreSQL persistence with Supabase Auth and row-level security;
@@ -63,7 +64,12 @@ This runs formatting checks, lint, typecheck, unit/golden tests, production buil
 
 ## Canonical event API
 
-`POST /api/events` validates the integration-ready event envelope and returns the deterministic impact preview. The demo endpoint does not persist data.
+`POST /api/events` validates the integration-ready event envelope and returns the deterministic impact preview. The unsigned demo endpoint does not persist data.
+When server-side integration credentials and PostgreSQL metadata are configured,
+the same route accepts the versioned signed envelope, enforces freshness, digest,
+tenant, nonce, idempotency, and rate controls, and atomically writes an event,
+receipt, audit event, and queued job. See
+[Signed Intake Profile](docs/SIGNED_INTAKE_PROFILE.md).
 
 ```json
 {
