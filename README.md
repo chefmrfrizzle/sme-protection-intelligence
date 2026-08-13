@@ -14,14 +14,25 @@ This application is decision support only. It does not determine, confirm, deny,
 - source-linked evidence and conflict-aware provenance;
 - adversarial Coverage Challenge Pass for every candidate gap;
 - Simple, Insurance, and Evidence explanation lenses;
+- a three-perspective insurance language guide with product guardrails and
+  authoritative terminology references;
+- an exact three-minute presenter rehearsal with timed cues, insurance-safe
+  narration, click instructions, and fallback actions;
 - Protection Diff, event timeline, scenario simulator, human review, and append-only audit history;
 - replayed validated AI extraction behind a typed agent harness;
 - downloadable professional PDF report and reproducible assessment receipt;
-- a canonical structured event API (`POST /api/events`);
+- a canonical structured event API (`POST /api/events`) with a synthetic
+  unsigned preview and an optional signed, replay-resistant durable boundary;
 - optional passwordless sign-in for a saved demonstration workspace;
 - a validated review API (`POST /api/reviews`) with durable signed-in receipts;
 - tenant-scoped PostgreSQL persistence with Supabase Auth and row-level security;
-- a private evidence bucket for future PDF/document intake;
+- governed synthetic evidence upload/download with quarantine, MIME and size
+  checks, SHA-256, deterministic scanner tests, immutable versions, access
+  receipts, retention/legal-hold gates, and erasure tombstones when configured;
+- append-only temporal fact candidates, source spans, conflicts, corrections,
+  and a fact-snapshot adapter for deterministic reconciliation;
+- a transactional outbox with allowlisted HTTPS delivery, DNS/IP SSRF checks,
+  signed idempotent payloads, bounded retries, dead letters, and audited replay;
 - resettable, third-party-independent demo mode.
 
 All company, person, policy, financial, asset, supplier, infrastructure, and document data is synthetic.
@@ -52,18 +63,23 @@ This runs formatting checks, lint, typecheck, unit/golden tests, production buil
 
 ## Demo rehearsal
 
-1. Reset to Protection Profile v1 on Overview.
-2. Open Changes and apply **New warehouse**.
-3. Open the new-location finding and inspect Simple, Insurance, and Evidence lenses.
-4. Open the source excerpts and Coverage Challenge result.
-5. Apply **Cloud dependency** and show `EVIDENCE_INCOMPLETE` abstention.
-6. Request professional review.
-7. Open Reports and download the assessment PDF.
-8. Open the audit trail and compare assessment versions.
+Open `/rehearsal` and click **Start timed rehearsal**. A persistent presenter
+coach follows the production flow and provides the exact narration, click,
+approved phrase, timer, and fallback for every scene. The run rehearses reset →
+warehouse change → finding → evidence → challenge → abstention → professional
+review → PDF → audit trail in exactly three minutes.
+
+The printable run-of-show is in
+[Three-Minute Demo](docs/THREE_MINUTE_DEMO.md).
 
 ## Canonical event API
 
-`POST /api/events` validates the integration-ready event envelope and returns the deterministic impact preview. The demo endpoint does not persist data.
+`POST /api/events` validates the integration-ready event envelope and returns the deterministic impact preview. The unsigned demo endpoint does not persist data.
+When server-side integration credentials and PostgreSQL metadata are configured,
+the same route accepts the versioned signed envelope, enforces freshness, digest,
+tenant, nonce, idempotency, and rate controls, and atomically writes an event,
+receipt, audit event, and queued job. See
+[Signed Intake Profile](docs/SIGNED_INTAKE_PROFILE.md).
 
 ```json
 {
@@ -79,7 +95,9 @@ This runs formatting checks, lint, typecheck, unit/golden tests, production buil
 ## Repository map
 
 See [Architecture](docs/ARCHITECTURE.md), [Algorithms](docs/ALGORITHMS.md),
-[Implementation Plan](docs/IMPLEMENTATION_PLAN.md), and
+[Implementation Plan](docs/IMPLEMENTATION_PLAN.md),
+[Insurance Language Guide](docs/INSURANCE_LANGUAGE_GUIDE.md),
+[Three-Minute Demo](docs/THREE_MINUTE_DEMO.md), and
 [Backend Setup](docs/BACKEND_SETUP.md). Engineering and safety constraints are
 in [AGENTS.md](AGENTS.md).
 
@@ -110,9 +128,11 @@ public demonstration. Supabase is used only by the optional signed-in workspace.
   tenant membership checks, append-only tables, and `POSTGRES` receipts.
 - Every application table has row-level security. Anonymous Data API reads are
   revoked, and the evidence bucket is private.
-- This is still a synthetic prototype. Real SME data requires retention/deletion
-  workflows, monitoring, backups, role onboarding, signed document delivery, and
-  independent security/privacy/legal review.
+- The included evidence scanner is a deterministic synthetic-test adapter, not a
+  production malware-scanning service.
+- This is still a synthetic prototype. Real SME data remains prohibited until an
+  approved scanner, policies, monitoring, backups, target-region validation, and
+  independent security/privacy/legal review are in place.
 
 ## AI boundary
 

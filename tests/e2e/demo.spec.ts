@@ -35,7 +35,7 @@ test("reset-to-report storyline is deterministic and reviewable", async ({
   }
 
   await expect(
-    page.getByText("Potential gap", { exact: true }).first(),
+    page.getByText("Potential protection gap", { exact: true }).first(),
   ).toBeVisible();
   await expect(
     page
@@ -51,7 +51,7 @@ test("reset-to-report storyline is deterministic and reviewable", async ({
 
   await page.getByRole("tab", { name: "Insurance" }).first().click();
   await expect(
-    page.getByRole("heading", { name: "SURVIVES" }).first(),
+    page.getByRole("heading", { name: "Finding remains for review" }).first(),
   ).toBeVisible();
   await expect(
     page.getByText(/possible scheduled-location mismatch/i).first(),
@@ -65,7 +65,7 @@ test("reset-to-report storyline is deterministic and reviewable", async ({
 
   await page.getByTestId("request-review").first().click();
   await expect(
-    page.getByText("REVIEWING", { exact: true }).first(),
+    page.getByText("Professional review in progress", { exact: true }).first(),
   ).toBeVisible();
   await page.getByRole("link", { name: "Open review case" }).click();
   await expect(
@@ -73,7 +73,7 @@ test("reset-to-report storyline is deterministic and reviewable", async ({
   ).toBeVisible();
   await expect(page.getByText(/Mock adapter · Not connected/i)).toBeVisible();
   await expect(
-    page.getByText("READY FOR PROFESSIONAL REVIEW", { exact: true }),
+    page.getByText("Ready for professional review", { exact: true }),
   ).toBeVisible();
 
   await page.goto("/changes");
@@ -178,6 +178,118 @@ test("scenario selections are reversible and explanation view persists", async (
   );
 });
 
+test("rehearsal coach drives the exact reset-to-audit presentation", async ({
+  page,
+}) => {
+  await page.goto("/rehearsal");
+  await expect(
+    page.getByRole("heading", { name: "Three-minute demo rehearsal" }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: "Start timed rehearsal" }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("main").getByText("Exact runtime").first(),
+  ).toBeVisible();
+  await expect(page.getByText("3:00", { exact: true }).first()).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: /^Open cue \d+:/ }),
+  ).toHaveCount(10);
+
+  await page.getByRole("button", { name: "Practice untimed" }).click();
+  await expect(page).toHaveURL(/\/overview$/);
+  await expect(page.getByTestId("rehearsal-dock")).toBeVisible();
+  await expect(
+    page.getByTestId("rehearsal-dock").getByText("Reset and frame the problem"),
+  ).toBeVisible();
+  await page.getByTestId("rehearsal-open-scene").click();
+  await expect(
+    page
+      .getByRole("main")
+      .getByRole("heading", { name: "100% evidence-aligned", exact: true })
+      .first(),
+  ).toBeVisible();
+
+  await page.getByTestId("rehearsal-next").click();
+  await page.getByTestId("rehearsal-next").click();
+  await expect(
+    page.getByTestId("rehearsal-dock").getByText("Apply the warehouse change"),
+  ).toBeVisible();
+  await page.getByTestId("rehearsal-open-scene").click();
+  await expect(
+    page
+      .getByText("New location may require protection review", { exact: true })
+      .first(),
+  ).toBeVisible();
+
+  await page.getByTestId("rehearsal-next").click();
+  await page.getByTestId("rehearsal-open-scene").click();
+  await expect(page).toHaveURL(/\/findings\/finding_new_location$/);
+  await expect(
+    page.getByText("Potential protection gap", { exact: true }).first(),
+  ).toBeVisible();
+
+  await page.getByTestId("rehearsal-next").click();
+  await page.getByTestId("rehearsal-open-scene").click();
+  await expect(page).toHaveURL(/#evidence-provenance$/);
+  await expect(page.getByRole("tab", { name: "Evidence" })).toHaveAttribute(
+    "aria-selected",
+    "true",
+  );
+
+  await page.getByTestId("rehearsal-next").click();
+  await page.getByTestId("rehearsal-open-scene").click();
+  await expect(page).toHaveURL(/#coverage-challenge$/);
+  await expect(page.getByRole("tab", { name: "Insurance" })).toHaveAttribute(
+    "aria-selected",
+    "true",
+  );
+  await expect(
+    page.getByRole("heading", { name: "Finding remains for review" }).first(),
+  ).toBeVisible();
+
+  await page.getByTestId("rehearsal-next").click();
+  await page.getByTestId("rehearsal-open-scene").click();
+  await expect(page).toHaveURL(/\/findings\/finding_cloud_dependency$/);
+  await expect(
+    page.getByText("Evidence incomplete", { exact: true }).first(),
+  ).toBeVisible();
+
+  await page.getByTestId("rehearsal-next").click();
+  await page.getByTestId("rehearsal-open-scene").click();
+  await expect(
+    page.getByRole("button", { name: "Expand rehearsal coach" }),
+  ).toBeVisible();
+  await page.getByTestId("request-review").click();
+  await expect(
+    page.getByText("Professional review in progress", { exact: true }).first(),
+  ).toBeVisible();
+  await page.getByRole("link", { name: "Open review case" }).click();
+  await expect(
+    page.getByRole("heading", { name: "Protection Review Case" }),
+  ).toBeVisible();
+
+  await page.getByRole("button", { name: "Expand rehearsal coach" }).click();
+  await page.getByTestId("rehearsal-next").click();
+  await page.getByTestId("rehearsal-open-scene").click();
+  await expect(page).toHaveURL(/\/reports$/);
+  await expect(page.getByTestId("download-report")).toBeVisible();
+  await expect(
+    page.getByText("Assessment v3 is source-linked and versioned"),
+  ).toBeVisible();
+
+  await page.getByRole("button", { name: "Expand rehearsal coach" }).click();
+  await page.getByTestId("rehearsal-next").click();
+  await page.getByTestId("rehearsal-open-scene").click();
+  await expect(page).toHaveURL(/\/audit$/);
+  await expect(
+    page.getByText("Profile v3", { exact: true }).first(),
+  ).toBeVisible();
+  await expect(
+    page.getByText("CHALLENGE PASS COMPLETED", { exact: true }).first(),
+  ).toBeVisible();
+});
+
 test("canonical event endpoint validates input without persisting it", async ({
   request,
 }) => {
@@ -243,4 +355,59 @@ test("public demo exposes optional sign-in without exposing a session", async ({
     page.getByRole("button", { name: "Email me a sign-in link" }),
   ).toBeVisible();
   await expect(page.getByText("No password is stored")).toBeVisible();
+});
+
+test("control centre explains readiness without making live or coverage claims", async ({
+  page,
+}) => {
+  await page.goto("/controls");
+  await expect(
+    page.getByRole("heading", { name: "Control centre" }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "Core trust substrate built" }).first(),
+  ).toBeVisible();
+  await expect(page.getByText("Live claims").first()).toBeVisible();
+  await expect(
+    page.getByText("Make an insurance or legal decision").first(),
+  ).toBeVisible();
+  await expect(page.getByText("BN-08").first()).toBeVisible();
+});
+
+test("language guide explains terms across three perspectives", async ({
+  page,
+}) => {
+  await page.goto("/glossary");
+  await expect(
+    page.getByRole("heading", { name: "Protection and insurance glossary" }),
+  ).toBeVisible();
+  await expect(
+    page
+      .getByRole("region", { name: "Language boundary" })
+      .getByText("Working definitions, not policy definitions", { exact: true })
+      .first(),
+  ).toBeVisible();
+
+  await page.getByRole("tab", { name: "Presenter cue" }).click();
+  await expect(
+    page.getByText(/the system tries to prove itself wrong/i),
+  ).toBeVisible();
+
+  const glossarySearch = page
+    .getByRole("main")
+    .getByRole("searchbox", { name: "Search the language guide" })
+    .first();
+  await glossarySearch.fill("contingent");
+  await expect(
+    page.getByRole("heading", { name: /Contingent business interruption/ }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "1 matching term" }),
+  ).toBeVisible();
+
+  await glossarySearch.fill("");
+  await page.getByRole("button", { name: "Assessment state" }).click();
+  await expect(
+    page.getByRole("heading", { name: "7 matching terms" }),
+  ).toBeVisible();
 });

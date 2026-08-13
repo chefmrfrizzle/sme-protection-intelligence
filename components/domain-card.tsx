@@ -7,26 +7,21 @@ import type {
   ProtectionDomain,
 } from "@/domain/types";
 import { StatusBadge } from "./status-badge";
-
-const domainNames: Record<ProtectionDomain, string> = {
-  CYBER: "Cyber",
-  PROPERTY_ASSETS: "Assets",
-  SUPPLY_CHAIN: "Supply Chain",
-  BUSINESS_CONTINUITY: "Business Continuity",
-};
+import { protectionDomainLabel } from "@/domain/language/insurance-language";
 
 export function domainName(domain: ProtectionDomain) {
-  return domainNames[domain];
+  return protectionDomainLabel(domain);
 }
 
 const alignedSimpleCopy: Record<ProtectionDomain, string> = {
   CYBER:
-    "Your current cyber information matches the technology setup we assessed.",
+    "The supplied cyber information supports alignment for the technology setup assessed.",
   PROPERTY_ASSETS:
-    "Your listed locations and asset values match the records supplied.",
-  SUPPLY_CHAIN: "No major supplier-dependency change was found.",
+    "The supplied schedule supports alignment for the locations and asset values assessed.",
+  SUPPLY_CHAIN:
+    "No material supplier-dependency change was identified in the records assessed.",
   BUSINESS_CONTINUITY:
-    "Your critical sites and dependencies match the records supplied.",
+    "The supplied evidence supports alignment for the critical sites and dependencies assessed.",
 };
 
 function domainDescription(
@@ -58,7 +53,7 @@ export function DomainCard({
   return (
     <Link className="domain-card" href={findingHref}>
       <div className="domain-card-top">
-        <h3>{domainNames[domain.domain]}</h3>
+        <h3>{protectionDomainLabel(domain.domain)}</h3>
         <ArrowUpRight aria-hidden="true" size={17} />
       </div>
       <StatusBadge state={domain.state} compact />

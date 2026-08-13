@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { AppShell } from "@/components/app-shell";
 import { DemoProvider } from "@/components/demo-provider";
+import { RehearsalProvider } from "@/components/rehearsal-provider";
 import { brand } from "@/domain/brand";
 
 export const metadata: Metadata = {
@@ -18,7 +19,9 @@ export default function RootLayout({
     <html lang="en" data-scroll-behavior="smooth">
       <body>
         <DemoProvider>
-          <AppShell>{children}</AppShell>
+          <RehearsalProvider>
+            <AppShell>{children}</AppShell>
+          </RehearsalProvider>
         </DemoProvider>
       </body>
     </html>

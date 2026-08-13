@@ -17,11 +17,16 @@ import { useDemo } from "@/components/demo-provider";
 import { evidenceArtifacts } from "@/demo/evidence";
 import { demoEvents, eventPresentation } from "@/demo/events";
 import { buildProtectionReviewCase } from "@/domain/integration/review-case";
+import {
+  challengeOutcomeLabel,
+  reviewCaseStateLabel,
+  reviewStatusLabel,
+} from "@/domain/language/insurance-language";
 
 const actionLabels = {
   ROUTE_FOR_REVIEW: "Send for professional review",
   REQUEST_EVIDENCE: "Request supporting documents",
-  ABSTAIN: "Leave unresolved — insufficient evidence",
+  ABSTAIN: "Record as unresolved",
 } as const;
 
 export default function ReviewCasePage() {
@@ -66,7 +71,7 @@ export default function ReviewCasePage() {
       <section className="case-summary-card">
         <div>
           <p className="eyebrow">Case state</p>
-          <h2>{reviewCase.state.replaceAll("_", " ")}</h2>
+          <h2>{reviewCaseStateLabel(reviewCase.state)}</h2>
           <p>
             Created from assessment v{reviewCase.assessmentVersion}. A qualified
             human owns every insurance decision and next action.
@@ -146,7 +151,7 @@ export default function ReviewCasePage() {
                   <div>
                     <small>Challenge</small>
                     <strong>
-                      {finding.challenge.outcome.replaceAll("_", " ")}
+                      {challengeOutcomeLabel(finding.challenge.outcome)}
                     </strong>
                   </div>
                   <div>
@@ -155,7 +160,7 @@ export default function ReviewCasePage() {
                   </div>
                   <div>
                     <small>Human review</small>
-                    <strong>{finding.reviewStatus.replaceAll("_", " ")}</strong>
+                    <strong>{reviewStatusLabel(finding.reviewStatus)}</strong>
                   </div>
                 </div>
                 {finding.missingEvidence.length ? (
@@ -242,8 +247,9 @@ export default function ReviewCasePage() {
               </span>
             ))}
             <small>
-              “Leave unresolved” is recorded as ABSTAIN in the structured audit
-              contract. No price, bind, coverage, or claim decision is allowed.
+              “Record as unresolved” is stored as a system abstention in the
+              structured audit contract. It does not choose an insurance
+              outcome. No price, bind, coverage, or claim decision is allowed.
             </small>
           </section>
         </aside>

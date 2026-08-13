@@ -1,11 +1,15 @@
 import { randomUUID } from "node:crypto";
 import postgres, { type Sql } from "postgres";
-import { DEMO_ORGANIZATION_ID, demoCompany } from "@/demo/company";
 import { evidenceArtifacts } from "@/demo/evidence";
 import { buildAssessment } from "@/domain/reconciliation/engine";
-import { demoHash } from "@/domain/reconciliation/hash";
+import { receiptHash } from "@/domain/crypto/receipts";
 import { ReviewReceiptSchema } from "@/domain/schemas";
 import type { ReviewReceipt } from "@/domain/types";
+import {
+  assertAuthorized,
+  OrganizationRoleSchema,
+  type ProtectedAction,
+} from "@/domain/authorization";
 import type {
   PersistenceResult,
   ProtectionRepositories,
@@ -31,30 +35,33 @@ function durableResult<T>(value: T): PersistenceResult<T> {
   return { value, persisted: true, storageMode: "POSTGRES" };
 }
 
-async function ensureMembership(sql: Sql, scope: TenantScope) {
+async function ensureMembership(
+  sql: Sql,
+  scope: TenantScope,
+  action: ProtectedAction,
+) {
   if (!scope.actorUserId) throw new Error("Authentication is required.");
-  if (scope.organizationId !== DEMO_ORGANIZATION_ID) {
-    throw new Error("Organization scope is invalid.");
-  }
-
-  await sql`
-    insert into organizations (id, legal_name)
-    values (${DEMO_ORGANIZATION_ID}, ${demoCompany.name})
-    on conflict (id) do nothing
-  `;
-  await sql`
-    insert into organization_members (organization_id, user_id, member_role)
-    values (${scope.organizationId}, ${scope.actorUserId}, 'SME_USER')
-    on conflict (organization_id, user_id) do nothing
-  `;
   const membership = await sql`
     select member_role
     from organization_members
     where organization_id = ${scope.organizationId}
       and user_id = ${scope.actorUserId}
+      and accepted_at is not null
+      and revoked_at is null
+      and (expires_at is null or expires_at > now())
     limit 1
   `;
   if (!membership.length) throw new Error("Organization access is denied.");
+  const role = OrganizationRoleSchema.parse(membership[0].member_role);
+  assertAuthorized(role, action);
+  return role;
+}
+
+export async function authorizeDatabaseScope(
+  scope: TenantScope,
+  action: ProtectedAction,
+) {
+  return ensureMembership(getDatabase(), scope, action);
 }
 
 function toIso(value: unknown) {
@@ -64,18 +71,18 @@ function toIso(value: unknown) {
 export const postgresRepositories: ProtectionRepositories = {
   assessments: {
     async getById(scope, assessmentId, eventIds) {
-      await ensureMembership(getDatabase(), scope);
+      await ensureMembership(getDatabase(), scope, "VIEW_WORKSPACE");
       const assessment = buildAssessment(eventIds);
       return assessment.id === assessmentId ? assessment : null;
     },
     async append(scope, assessment) {
       const sql = getDatabase();
-      await ensureMembership(sql, scope);
+      await ensureMembership(sql, scope, "VIEW_WORKSPACE");
       await sql.begin(async (transaction) => {
         await transaction`
           insert into assessments (id, organization_id, current_version)
           values (${assessment.id}, ${scope.organizationId}, ${assessment.version})
-          on conflict (id) do update
+          on conflict (organization_id, id) do update
             set current_version = greatest(assessments.current_version, excluded.current_version)
         `;
         await transaction`
@@ -86,7 +93,7 @@ export const postgresRepositories: ProtectionRepositories = {
             ${scope.organizationId}, ${assessment.id}, ${assessment.version},
             ${assessment.snapshotAt}, ${assessment.evidenceSnapshotId},
             ${assessment.rulesetVersion}, ${transaction.json(assessment)},
-            ${assessment.receiptHash}
+            ${receiptHash(assessment)}
           )
           on conflict (organization_id, assessment_id, version) do nothing
         `;
@@ -96,7 +103,7 @@ export const postgresRepositories: ProtectionRepositories = {
   },
   evidence: {
     async listByIds(scope, evidenceIds) {
-      await ensureMembership(getDatabase(), scope);
+      await ensureMembership(getDatabase(), scope, "VIEW_WORKSPACE");
       const requested = new Set(evidenceIds);
       return evidenceArtifacts.filter(
         (artifact) =>
@@ -108,7 +115,7 @@ export const postgresRepositories: ProtectionRepositories = {
   reviews: {
     async append(scope, command, occurredAt): Promise<ReviewReceipt> {
       const sql = getDatabase();
-      await ensureMembership(sql, scope);
+      const trustedRole = await ensureMembership(sql, scope, "SUBMIT_REVIEW");
       return sql.begin(async (transaction) => {
         const existing = await transaction`
           select id::text, organization_id, assessment_id, finding_id, status,
@@ -128,9 +135,9 @@ export const postgresRepositories: ProtectionRepositories = {
               occurred_at, receipt_hash
             ) values (
               ${scope.organizationId}, ${command.assessmentId}, ${command.findingId},
-              ${command.status}, ${scope.actorUserId!}, ${command.reviewer.role},
+              ${command.status}, ${scope.actorUserId!}, ${trustedRole},
               ${command.rationale ?? null}, ${command.idempotencyKey}, ${occurredAt},
-              ${demoHash({ command, occurredAt, actor: scope.actorUserId })}
+              ${receiptHash({ command, occurredAt, actor: scope.actorUserId })}
             )
             returning id::text, organization_id, assessment_id, finding_id, status,
               reviewer_subject, reviewer_role, rationale, idempotency_key, occurred_at
@@ -155,7 +162,7 @@ export const postgresRepositories: ProtectionRepositories = {
           actor: `${review.reviewer} (${review.role})`,
           occurredAt: review.occurredAt,
           summary: `${review.findingId} moved to ${review.status}.`,
-          snapshotHash: demoHash(review),
+          snapshotHash: receiptHash(review),
         };
         if (!existing.length) {
           await transaction`
@@ -169,6 +176,39 @@ export const postgresRepositories: ProtectionRepositories = {
               ${auditEvent.snapshotHash}, ${auditEvent.occurredAt}
             )
           `;
+          const endpoint = await transaction`
+            select id::text
+            from integration_endpoints
+            where organization_id = ${scope.organizationId}
+              and status = 'ACTIVE'
+            order by created_at
+            limit 1
+          `;
+          const outboxId = randomUUID();
+          const idempotencyKey = `${scope.organizationId}:review:${review.id}`;
+          const payload = {
+            schemaVersion: "protection-review-case/1.0",
+            deliveryId: outboxId,
+            organizationId: scope.organizationId,
+            assessmentId: review.assessmentId,
+            findingId: review.findingId,
+            reviewState: review.status,
+            allowedActions: ["ROUTE_FOR_REVIEW", "REQUEST_EVIDENCE", "ABSTAIN"],
+            synthetic: true,
+          };
+          await transaction`
+            insert into outbox_events (
+              organization_id, id, endpoint_id, aggregate_type, aggregate_id,
+              event_type, schema_version, idempotency_key, correlation_id,
+              payload, status, attempts, max_attempts, available_at, receipt_hash
+            ) values (
+              ${scope.organizationId}, ${outboxId}, ${endpoint[0]?.id ?? null},
+              'REVIEW', ${review.id}, 'PROFESSIONAL_REVIEW_STATE_CHANGED',
+              'protection-review-case/1.0', ${idempotencyKey},
+              ${review.assessmentId}, ${transaction.json(payload)}, 'PENDING',
+              0, 5, now(), ${receiptHash({ payload, idempotencyKey })}
+            )
+          `;
         }
         return ReviewReceiptSchema.parse({
           accepted: true,
@@ -176,13 +216,13 @@ export const postgresRepositories: ProtectionRepositories = {
           storageMode: "POSTGRES",
           review,
           auditEvent,
-          receiptHash: demoHash({ review, auditEvent }),
+          receiptHash: receiptHash({ review, auditEvent }),
         });
       });
     },
     async list(scope, assessmentId) {
       const sql = getDatabase();
-      await ensureMembership(sql, scope);
+      await ensureMembership(sql, scope, "VIEW_WORKSPACE");
       const rows = await sql`
         select distinct on (finding_id)
           id::text, organization_id, assessment_id, finding_id, status,
@@ -209,7 +249,7 @@ export const postgresRepositories: ProtectionRepositories = {
   audit: {
     async append(scope, event) {
       const sql = getDatabase();
-      await ensureMembership(sql, scope);
+      await ensureMembership(sql, scope, "VIEW_WORKSPACE");
       await sql`
         insert into audit_events (
           id, organization_id, event_type, actor_subject, summary,
@@ -217,7 +257,7 @@ export const postgresRepositories: ProtectionRepositories = {
         ) values (
           ${randomUUID()}, ${scope.organizationId}, ${event.eventType},
           ${scope.actorUserId!}, ${event.summary}, ${sql.json({ sourceId: event.id })},
-          ${event.snapshotHash}, ${event.occurredAt}
+          ${receiptHash(event)}, ${event.occurredAt}
         )
       `;
       return durableResult(event);
@@ -226,17 +266,20 @@ export const postgresRepositories: ProtectionRepositories = {
   reports: {
     async append(scope, report) {
       const sql = getDatabase();
-      await ensureMembership(sql, scope);
+      await ensureMembership(sql, scope, "GENERATE_REPORT");
       await sql`
         insert into reports (
           id, organization_id, assessment_id, evidence_snapshot_id,
-          ruleset_version, content_hash, generated_at
+          ruleset_version, configuration_version, review_event_ids,
+          receipt_hash, content_hash, generated_at
         ) values (
           ${report.id}, ${scope.organizationId}, ${report.assessmentId},
           ${report.evidenceSnapshotId}, ${report.rulesetVersion},
+          ${report.configurationVersion}, ${report.reviewEventIds},
+          ${report.receiptHash},
           ${report.contentHash}, ${report.generatedAt}
         )
-        on conflict (id) do nothing
+        on conflict (organization_id, id) do nothing
       `;
       return durableResult(report);
     },

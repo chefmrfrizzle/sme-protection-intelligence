@@ -149,6 +149,7 @@ function finalizeFinding(
 }
 
 function evaluateFindings(
+  organizationId: string,
   exposure: ExposureSnapshot,
   policy: PolicySnapshot,
   eventIds: string[],
@@ -164,7 +165,7 @@ function evaluateFindings(
   ) {
     const candidate: FindingInput = {
       id: "finding_new_location",
-      organizationId: DEMO_ORGANIZATION_ID,
+      organizationId,
       title: "New location may require protection review",
       domain: "PROPERTY_ASSETS",
       state: "POTENTIAL_GAP",
@@ -218,13 +219,13 @@ function evaluateFindings(
   ) {
     const candidate: FindingInput = {
       id: "finding_asset_value",
-      organizationId: DEMO_ORGANIZATION_ID,
+      organizationId,
       title: "Asset values have materially increased",
       domain: "PROPERTY_ASSETS",
       state: "REVIEW_RECOMMENDED",
       summary: `Observed assets are S$${exposure.assetValueSgd.toLocaleString("en-SG")}, compared with S$${policy.declaredAssetValueSgd.toLocaleString("en-SG")} in the supplied property schedule.`,
       simpleExplanation:
-        "Your recorded equipment and assets increased by S$350,000. The insured values you supplied have not changed with them.",
+        "Your recorded equipment and assets increased by S$350,000. The values recorded in the supplied property schedule have not changed with them.",
       insuranceExplanation:
         "Observed property values increased by 70%, exceeding both configured relative and absolute materiality thresholds. Declared values review is recommended.",
       whyItMatters:
@@ -266,7 +267,7 @@ function evaluateFindings(
   ) {
     const candidate: FindingInput = {
       id: "finding_supplier_concentration",
-      organizationId: DEMO_ORGANIZATION_ID,
+      organizationId,
       title: "Critical supplier concentration increased",
       domain: "SUPPLY_CHAIN",
       state: "REVIEW_RECOMMENDED",
@@ -275,7 +276,7 @@ function evaluateFindings(
       simpleExplanation:
         "Your business now relies much more heavily on one supplier for a critical component.",
       insuranceExplanation:
-        "Critical supplier dependency increased by 32 percentage points to 54%. Supply-chain and business-interruption dependency review is recommended.",
+        "Critical supplier dependency increased by 32 percentage points to 54%. Supply-chain and contingent business interruption dependency review is recommended.",
       whyItMatters:
         "A disruption at a concentrated supplier can affect production and revenue recovery.",
       evidenceIds: [
@@ -314,14 +315,14 @@ function evaluateFindings(
   ) {
     const candidate: FindingInput = {
       id: "finding_cloud_dependency",
-      organizationId: DEMO_ORGANIZATION_ID,
+      organizationId,
       title: "Cloud dependency assessment needs more evidence",
       domain: "CYBER",
       state: "EVIDENCE_INCOMPLETE",
       summary:
         "Three critical cloud dependencies are now recorded, but supplied cyber evidence describes only the original AWS environment.",
       simpleExplanation:
-        "You added two important cloud services. We do not have enough current insurance and control evidence to tell how they should be reviewed.",
+        "You added two important cloud services. We do not have enough current insurance and control information to complete this check.",
       insuranceExplanation:
         "Critical technology dependency changed from one to three. Current cyber and business-interruption evidence is incomplete for the additional dependencies; no protection-gap conclusion was made.",
       whyItMatters:
@@ -359,7 +360,7 @@ function evaluateFindings(
   ) {
     const candidate: FindingInput = {
       id: "finding_new_geography",
-      organizationId: DEMO_ORGANIZATION_ID,
+      organizationId,
       title: "Territorial wording requires professional interpretation",
       domain: "BUSINESS_CONTINUITY",
       state: "POLICY_INTERPRETATION_REQUIRED",
@@ -482,6 +483,7 @@ function domainAssessments(findings: Finding[]): DomainAssessment[] {
 }
 
 function auditEvents(
+  organizationId: string,
   eventIds: string[],
   findings: Finding[],
   snapshotAt: string,
@@ -489,7 +491,7 @@ function auditEvents(
   const events: AuditEvent[] = [
     {
       id: "audit_baseline",
-      organizationId: DEMO_ORGANIZATION_ID,
+      organizationId,
       eventType: "ASSESSMENT_CREATED",
       actor: "Deterministic reconciliation service",
       occurredAt: demoCompany.baselineAt,
@@ -507,7 +509,7 @@ function auditEvents(
     if (!event) continue;
     events.push({
       id: `audit_${eventId}`,
-      organizationId: DEMO_ORGANIZATION_ID,
+      organizationId,
       eventType: "CHANGE_EVENT_APPLIED",
       actor: "Synthetic demo connector",
       occurredAt: event.observedAt,
@@ -519,7 +521,7 @@ function auditEvents(
     events.push(
       {
         id: `audit_${finding.id}`,
-        organizationId: DEMO_ORGANIZATION_ID,
+        organizationId,
         eventType: "FINDING_CREATED",
         actor: "Deterministic reconciliation service",
         occurredAt: snapshotAt,
@@ -528,7 +530,7 @@ function auditEvents(
       },
       {
         id: `audit_${finding.challenge.id}`,
-        organizationId: DEMO_ORGANIZATION_ID,
+        organizationId,
         eventType: "CHALLENGE_PASS_COMPLETED",
         actor: "Coverage challenge service",
         occurredAt: snapshotAt,
@@ -564,12 +566,45 @@ export function buildAssessment(
       options.endorsementIncludesLocationB ??
       baselinePolicy.endorsementIncludesLocationB,
   };
+  return buildAssessmentFromSnapshots({
+    organizationId: DEMO_ORGANIZATION_ID,
+    eventIds,
+    snapshotAt,
+    exposure,
+    policy,
+    options,
+  });
+}
+
+export function buildAssessmentFromSnapshots(input: {
+  organizationId: string;
+  eventIds: string[];
+  snapshotAt: string;
+  exposure: ExposureSnapshot;
+  policy: PolicySnapshot;
+  options?: AssessmentOptions;
+}): Assessment {
+  const {
+    organizationId,
+    eventIds,
+    snapshotAt,
+    exposure,
+    policy,
+    options = {},
+  } = input;
   const findings = policy.policyCurrent
-    ? evaluateFindings(exposure, policy, eventIds, snapshotAt, options)
+    ? evaluateFindings(
+        organizationId,
+        exposure,
+        policy,
+        eventIds,
+        snapshotAt,
+        options,
+      )
     : [
         FindingSchema.parse({
           id: "finding_missing_policy",
-          organizationId: DEMO_ORGANIZATION_ID,
+          organizationId,
           title: "Current policy evidence is missing",
           domain: "PROPERTY_ASSETS",
           state: "EVIDENCE_INCOMPLETE",
@@ -613,9 +648,9 @@ export function buildAssessment(
   );
   const version = eventIds.length + 1;
   const evidenceSnapshotId = `snapshot_${demoHash({ eventIds, snapshotAt }).slice(-12)}`;
-  const audit = auditEvents(eventIds, findings, snapshotAt);
+  const audit = auditEvents(organizationId, eventIds, findings, snapshotAt);
   const receiptPayload = {
-    organizationId: DEMO_ORGANIZATION_ID,
+    organizationId,
     version,
     snapshotAt,
     rulesetVersion: RULESET_VERSION,
@@ -625,7 +660,7 @@ export function buildAssessment(
   };
   return AssessmentSchema.parse({
     id: `assessment_v${version}`,
-    organizationId: DEMO_ORGANIZATION_ID,
+    organizationId,
     version,
     label: `Protection Profile - Version ${version}`,
     snapshotAt,

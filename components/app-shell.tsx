@@ -4,14 +4,17 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   Activity,
+  BookOpenText,
   Boxes,
   ClipboardCheck,
+  Cog,
   FileOutput,
   Files,
   FlaskConical,
   History,
   LayoutDashboard,
   Menu,
+  Presentation,
   RotateCcw,
   ShieldCheck,
   X,
@@ -20,6 +23,7 @@ import { useState, type ReactNode } from "react";
 import { brand } from "@/domain/brand";
 import { useDemo } from "./demo-provider";
 import { AccountControl } from "./account-control";
+import { RehearsalDock } from "./rehearsal-dock";
 
 const primaryNavigation = [
   { href: "/overview", label: "Overview", icon: LayoutDashboard },
@@ -31,6 +35,9 @@ const primaryNavigation = [
 ] as const;
 
 const secondaryNavigation = [
+  { href: "/rehearsal", label: "Demo rehearsal", icon: Presentation },
+  { href: "/glossary", label: "Language guide", icon: BookOpenText },
+  { href: "/controls", label: "Control centre", icon: Cog },
   { href: "/simulator", label: "Scenario simulator", icon: FlaskConical },
   { href: "/audit", label: "View audit trail", icon: History },
 ] as const;
@@ -154,6 +161,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         </div>
       ) : null}
       <main className="main-content">{children}</main>
+      <RehearsalDock />
     </div>
   );
 }

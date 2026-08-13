@@ -8,20 +8,17 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import type { ProtectionState } from "@/domain/types";
+import { stateLabel } from "@/domain/language/insurance-language";
 
-const stateMeta: Record<ProtectionState, { label: string; icon: LucideIcon }> =
-  {
-    ALIGNED: { label: "Aligned", icon: CheckCircle2 },
-    REVIEW_RECOMMENDED: { label: "Review recommended", icon: AlertCircle },
-    POTENTIAL_GAP: { label: "Potential gap", icon: AlertTriangle },
-    EVIDENCE_INCOMPLETE: { label: "Evidence incomplete", icon: FileQuestion },
-    EVIDENCE_CONFLICT: { label: "Evidence conflict", icon: AlertTriangle },
-    POLICY_INTERPRETATION_REQUIRED: {
-      label: "Interpretation required",
-      icon: Scale,
-    },
-    NOT_ASSESSED: { label: "Not assessed", icon: CircleHelp },
-  };
+const stateMeta: Record<ProtectionState, { icon: LucideIcon }> = {
+  ALIGNED: { icon: CheckCircle2 },
+  REVIEW_RECOMMENDED: { icon: AlertCircle },
+  POTENTIAL_GAP: { icon: AlertTriangle },
+  EVIDENCE_INCOMPLETE: { icon: FileQuestion },
+  EVIDENCE_CONFLICT: { icon: AlertTriangle },
+  POLICY_INTERPRETATION_REQUIRED: { icon: Scale },
+  NOT_ASSESSED: { icon: CircleHelp },
+};
 
 export function StatusBadge({
   state,
@@ -35,13 +32,10 @@ export function StatusBadge({
   return (
     <span
       className={`status-badge state-${state.toLowerCase()} ${compact ? "compact" : ""}`}
+      title={stateLabel(state)}
     >
       <Icon aria-hidden="true" size={compact ? 13 : 15} />
-      {meta.label}
+      {stateLabel(state)}
     </span>
   );
-}
-
-export function stateLabel(state: ProtectionState) {
-  return stateMeta[state].label;
 }
