@@ -17,11 +17,18 @@ This application is decision support only. It does not determine, confirm, deny,
 - Protection Diff, event timeline, scenario simulator, human review, and append-only audit history;
 - replayed validated AI extraction behind a typed agent harness;
 - downloadable professional PDF report and reproducible assessment receipt;
-- a canonical structured event API (`POST /api/events`);
+- a canonical structured event API (`POST /api/events`) with a synthetic
+  unsigned preview and an optional signed, replay-resistant durable boundary;
 - optional passwordless sign-in for a saved demonstration workspace;
 - a validated review API (`POST /api/reviews`) with durable signed-in receipts;
 - tenant-scoped PostgreSQL persistence with Supabase Auth and row-level security;
-- a private evidence bucket for future PDF/document intake;
+- governed synthetic evidence upload/download with quarantine, MIME and size
+  checks, SHA-256, deterministic scanner tests, immutable versions, access
+  receipts, retention/legal-hold gates, and erasure tombstones when configured;
+- append-only temporal fact candidates, source spans, conflicts, corrections,
+  and a fact-snapshot adapter for deterministic reconciliation;
+- a transactional outbox with allowlisted HTTPS delivery, DNS/IP SSRF checks,
+  signed idempotent payloads, bounded retries, dead letters, and audited replay;
 - resettable, third-party-independent demo mode.
 
 All company, person, policy, financial, asset, supplier, infrastructure, and document data is synthetic.
@@ -63,7 +70,12 @@ This runs formatting checks, lint, typecheck, unit/golden tests, production buil
 
 ## Canonical event API
 
-`POST /api/events` validates the integration-ready event envelope and returns the deterministic impact preview. The demo endpoint does not persist data.
+`POST /api/events` validates the integration-ready event envelope and returns the deterministic impact preview. The unsigned demo endpoint does not persist data.
+When server-side integration credentials and PostgreSQL metadata are configured,
+the same route accepts the versioned signed envelope, enforces freshness, digest,
+tenant, nonce, idempotency, and rate controls, and atomically writes an event,
+receipt, audit event, and queued job. See
+[Signed Intake Profile](docs/SIGNED_INTAKE_PROFILE.md).
 
 ```json
 {
@@ -89,6 +101,7 @@ in [AGENTS.md](AGENTS.md).
 - `zod`: validated domain, event, agent, and API boundaries;
 - `lucide-react`: accessible interface icons;
 - `pdf-lib`: deterministic server-side PDF generation without a browser service;
+- `@noble/hashes`: synchronous SHA-256 for matching browser and server demo receipts;
 - `@supabase/supabase-js`, `@supabase/ssr`: passwordless sign-in and secure
   server-session cookies;
 - `postgres`: small server-only PostgreSQL driver for transactional persistence;
@@ -102,6 +115,17 @@ public demonstration. Supabase is used only by the optional signed-in workspace.
 
 ## Security and privacy boundary
 
+New replay assessments, review cases and audit receipts use canonical JSON encoded
+as UTF-8 and SHA-256, matching the server receipt implementation. The synthetic
+evidence register hashes its structured records and excerpts, not nonexistent
+original PDF/XLSX bytes. Historical stored FNV receipts are not rewritten or
+represented as SHA-256; replaying the fixture with this release produces a new
+digest. A digest alone does not establish trusted authorship or durable history.
+
+The Overview introduces the Enterprise Risk Passport direction while retaining
+Protection as the evaluated module. Financial health, financing and trade are
+explicitly not assessed. Existing rules and alignment calculations are unchanged.
+
 - Synthetic data only; no real SME or insurer information.
 - `.env*`, `.vercel`, secrets, tokens, private source documents, build output, and local reports are ignored.
 - Signed-out scenario state stays in the visitor's browser; receipts explicitly
@@ -110,9 +134,11 @@ public demonstration. Supabase is used only by the optional signed-in workspace.
   tenant membership checks, append-only tables, and `POSTGRES` receipts.
 - Every application table has row-level security. Anonymous Data API reads are
   revoked, and the evidence bucket is private.
-- This is still a synthetic prototype. Real SME data requires retention/deletion
-  workflows, monitoring, backups, role onboarding, signed document delivery, and
-  independent security/privacy/legal review.
+- The included evidence scanner is a deterministic synthetic-test adapter, not a
+  production malware-scanning service.
+- This is still a synthetic prototype. Real SME data remains prohibited until an
+  approved scanner, policies, monitoring, backups, target-region validation, and
+  independent security/privacy/legal review are in place.
 
 ## AI boundary
 

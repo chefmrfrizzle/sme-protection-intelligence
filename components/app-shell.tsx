@@ -6,6 +6,7 @@ import {
   Activity,
   Boxes,
   ClipboardCheck,
+  Cog,
   FileOutput,
   Files,
   FlaskConical,
@@ -31,6 +32,7 @@ const primaryNavigation = [
 ] as const;
 
 const secondaryNavigation = [
+  { href: "/controls", label: "Control centre", icon: Cog },
   { href: "/simulator", label: "Scenario simulator", icon: FlaskConical },
   { href: "/audit", label: "View audit trail", icon: History },
 ] as const;

@@ -12,7 +12,8 @@ service:
 
 1. Supabase Auth verifies the person using the saved workspace.
 2. PostgreSQL stores structured records.
-3. The private `evidence-private` bucket is reserved for future document uploads.
+3. The private `evidence-private` bucket supports governed synthetic evidence
+   lifecycle tests. It is not approved for real customer documents.
 
 No real SME data is stored. The production Site URL is the live Vercel auth
 callback. The database region is Singapore.
@@ -48,12 +49,17 @@ next run. `storage:provision` creates the private bucket only when missing.
   user or company membership.
 - The synthetic organization is the only tenant available in this showcase.
 - Every structured record includes `organization_id`.
-- Eight public-schema application tables have RLS enabled.
+- Every application table created by the migrations has RLS enabled and direct
+  Data API grants are revoked.
 - Anonymous and authenticated Data API table grants are revoked; validated
   Next.js server routes own writes.
 - Review, audit, and assessment-version rows are append-only.
 - The service/secret key and database URLs are server-only.
-- Private evidence access has no public bucket URL.
+- Private evidence access has no public bucket URL. Signed downloads expire after
+  60 seconds and produce access receipts.
+- Synthetic uploads are quarantined, validated, hashed, scanned through the demo
+  scanner adapter, versioned, and audited. Retention and legal hold block erasure;
+  approved erasure removes content and retains a non-sensitive tombstone.
 
 ## Environment names
 
@@ -73,8 +79,8 @@ prefix database passwords, service-role keys, or secret keys with
 
 ## Before accepting real SME data
 
-This prototype is not ready for real insurance documents. First add approved
-member invitations and roles, signed upload/download routes, retention and
-deletion controls, backups and restore rehearsal, monitoring and alerting,
-separate preview/production data, rate limiting, and independent legal,
-privacy, security, and regulatory review.
+This prototype is not ready for real insurance documents. Approved membership,
+signed synthetic upload/download, retention, deletion, and access-ledger code now
+exists, but a production scanner, approved policies, target-region validation,
+backup/restore rehearsal, monitoring, penetration testing, and independent legal,
+privacy, security, and regulatory review are still required.

@@ -1,6 +1,7 @@
 import type { RuleDefinition } from "../types";
 
 export const RULESET_VERSION = "2026.08.1";
+export const CONFIGURATION_VERSION = "demo-config-2026.08.1";
 
 export const rules = {
   newLocation: {

@@ -13,6 +13,7 @@ import {
 import { buildAssessment } from "@/domain/reconciliation/engine";
 import { demoHash } from "@/domain/reconciliation/hash";
 import type { Assessment, ReviewStatus } from "@/domain/types";
+import type { OrganizationRole } from "@/domain/authorization";
 import { demoEvents } from "@/demo/events";
 
 const STORAGE_KEY = "product-demo-state-v2";
@@ -23,7 +24,7 @@ export type ReviewRecord = {
   status: ReviewStatus;
   at: string;
   reviewer: string;
-  role: "SME_USER" | "BROKER_RISK_ADVISOR" | "INSURER_REVIEWER";
+  role: OrganizationRole;
 };
 
 type StoredState = {

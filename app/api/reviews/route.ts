@@ -24,11 +24,19 @@ export async function GET(request: NextRequest) {
     actorUserId: identity.userId,
   };
   const repositories = getRepositories(scope);
-  const assessment = await repositories.assessments.getById(
-    scope,
-    assessmentId,
-    eventIds,
-  );
+  let assessment;
+  try {
+    assessment = await repositories.assessments.getById(
+      scope,
+      assessmentId,
+      eventIds,
+    );
+  } catch {
+    return Response.json(
+      { error: "Organization access is denied" },
+      { status: 403 },
+    );
+  }
   if (!assessment) {
     return Response.json(
       { error: "Assessment snapshot mismatch" },

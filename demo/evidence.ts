@@ -1,8 +1,9 @@
+import { demoHash } from "@/domain/reconciliation/hash";
 import { EvidenceArtifactSchema } from "@/domain/schemas";
 import type { EvidenceArtifact, SourceReference } from "@/domain/types";
 import { DEMO_ORGANIZATION_ID } from "./company";
 
-const artifacts: EvidenceArtifact[] = [
+const artifacts: Omit<EvidenceArtifact, "sourceHash">[] = [
   {
     id: "ev_policy_schedule",
     organizationId: DEMO_ORGANIZATION_ID,
@@ -13,7 +14,6 @@ const artifacts: EvidenceArtifact[] = [
     issuedAt: "2026-01-03T00:00:00.000Z",
     validFrom: "2026-01-01T00:00:00.000Z",
     validTo: "2026-12-31T15:59:59.000Z",
-    sourceHash: "sha256-demo-policy-schedule-7a14",
     synthetic: true,
     pages: [
       {
@@ -38,7 +38,6 @@ const artifacts: EvidenceArtifact[] = [
     issuedAt: "2026-01-03T00:00:00.000Z",
     validFrom: "2026-01-01T00:00:00.000Z",
     validTo: "2026-12-31T15:59:59.000Z",
-    sourceHash: "sha256-demo-property-schedule-129e",
     synthetic: true,
     pages: [
       {
@@ -63,7 +62,6 @@ const artifacts: EvidenceArtifact[] = [
     issuedAt: "2026-01-03T00:00:00.000Z",
     validFrom: "2026-01-01T00:00:00.000Z",
     validTo: "2026-12-31T15:59:59.000Z",
-    sourceHash: "sha256-demo-cyber-summary-955b",
     synthetic: true,
     pages: [
       {
@@ -87,7 +85,6 @@ const artifacts: EvidenceArtifact[] = [
     version: "1.0",
     issuedAt: "2026-01-03T00:00:00.000Z",
     validFrom: "2026-01-01T00:00:00.000Z",
-    sourceHash: "sha256-demo-wording-a309",
     synthetic: true,
     pages: [
       {
@@ -111,7 +108,6 @@ const artifacts: EvidenceArtifact[] = [
     version: "1.0",
     issuedAt: "2026-02-10T00:00:00.000Z",
     validFrom: "2026-02-10T00:00:00.000Z",
-    sourceHash: "sha256-demo-endorsements-c14e",
     synthetic: true,
     pages: [
       {
@@ -136,7 +132,6 @@ const artifacts: EvidenceArtifact[] = [
     issuedAt: "2026-06-20T00:00:00.000Z",
     validFrom: "2026-07-01T00:00:00.000Z",
     validTo: "2028-06-30T15:59:59.000Z",
-    sourceHash: "sha256-demo-lease-b-920d",
     synthetic: true,
     pages: [
       {
@@ -160,7 +155,6 @@ const artifacts: EvidenceArtifact[] = [
     version: "2026.07",
     issuedAt: "2026-07-03T00:00:00.000Z",
     validFrom: "2026-07-03T00:00:00.000Z",
-    sourceHash: "sha256-demo-assets-july-b013",
     synthetic: true,
     pages: [
       {
@@ -184,7 +178,6 @@ const artifacts: EvidenceArtifact[] = [
     version: "2026.Q3",
     issuedAt: "2026-07-10T00:00:00.000Z",
     validFrom: "2026-07-10T00:00:00.000Z",
-    sourceHash: "sha256-demo-suppliers-q3-f1b0",
     synthetic: true,
     pages: [
       {
@@ -203,7 +196,6 @@ const artifacts: EvidenceArtifact[] = [
     version: "2026.Q2",
     issuedAt: "2026-06-30T00:00:00.000Z",
     validFrom: "2026-04-01T00:00:00.000Z",
-    sourceHash: "sha256-demo-financial-q2-510c",
     synthetic: true,
     pages: [
       {
@@ -222,7 +214,6 @@ const artifacts: EvidenceArtifact[] = [
     version: "2026.07",
     issuedAt: "2026-07-14T00:00:00.000Z",
     validFrom: "2026-07-14T00:00:00.000Z",
-    sourceHash: "sha256-demo-infra-july-64cd",
     synthetic: true,
     pages: [
       {
@@ -239,8 +230,12 @@ const artifacts: EvidenceArtifact[] = [
   },
 ];
 
-export const evidenceArtifacts =
-  EvidenceArtifactSchema.array().parse(artifacts);
+export const evidenceArtifacts = EvidenceArtifactSchema.array().parse(
+  artifacts.map((artifact) => ({
+    ...artifact,
+    sourceHash: demoHash(artifact),
+  })),
+);
 
 export const evidenceById = new Map(
   evidenceArtifacts.map((artifact) => [artifact.id, artifact]),
