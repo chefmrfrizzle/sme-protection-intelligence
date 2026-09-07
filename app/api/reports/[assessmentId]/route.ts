@@ -1,3 +1,4 @@
+import { brand } from "@/domain/brand";
 import { NextRequest } from "next/server";
 import { z } from "zod";
 import { ReviewStatusSchema } from "@/domain/schemas";
@@ -126,7 +127,7 @@ export async function GET(
   return new Response(Buffer.from(bytes), {
     headers: {
       "Content-Type": "application/pdf",
-      "Content-Disposition": `attachment; filename="PRODUCT_Protection_Alignment_${assessment.id}.pdf"`,
+      "Content-Disposition": `attachment; filename="${brand.wordmark}_Protection_Alignment_${assessment.id}.pdf"`,
       "Cache-Control": "private, no-store",
       "X-Assessment-Content-Hash": contentHash,
       "X-Report-Receipt-Hash": reportReceiptHash,

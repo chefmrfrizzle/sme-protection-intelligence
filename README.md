@@ -1,8 +1,12 @@
-# [PRODUCT] - SME Protection Intelligence Demo
+# SMETECH — Enterprise Risk Passport
 
 > SMEs change every day. Their protection may not.
 
-[PRODUCT] is a synthetic-data, evidence-first demonstration of continuous exposure-to-protection reconciliation for growing SMEs. It detects `Protection Drift`: material differences between how a business operates now and what its supplied insurance programme appears to protect.
+SMETECH is a synthetic-data, evidence-first Enterprise Risk Passport demonstration. It continuously reconciles how an SME operates, what evidence supports that operating state, what changed, and which areas require review.
+
+Protection is the first implemented risk module. It detects `Protection Drift`: material differences between current operations and supplied protection evidence. Financial health, financing, trade, and additional risk modules are future extensions and are not currently assessed.
+
+Evidence Alignment measures agreement and completeness within the evaluated evidence scope. Protection Alignment concerns supplied protection evidence and operating exposures. Neither establishes the overall Risk State of a business: no overall risk score is calculated. Evidence alignment is not a risk rating, credit score, confirmation of coverage, claim prediction, or underwriting decision. 100% evidence-aligned does not mean 100% safe.
 
 This application is decision support only. It does not determine, confirm, deny, bind, or price coverage; provide legal advice; decide claim validity; or replace an insurer, broker, underwriter, or risk professional.
 
@@ -14,7 +18,7 @@ This application is decision support only. It does not determine, confirm, deny,
 - source-linked evidence and conflict-aware provenance;
 - adversarial Coverage Challenge Pass for every candidate gap;
 - Simple, Insurance, and Evidence explanation lenses;
-- Protection Diff, event timeline, scenario simulator, human review, and append-only audit history;
+- Protection Diff, Enterprise Event Ledger, Scenario Impact, human review, and append-only audit history;
 - replayed validated AI extraction behind a typed agent harness;
 - downloadable professional PDF report and reproducible assessment receipt;
 - a canonical structured event API (`POST /api/events`) with a synthetic
@@ -146,4 +150,4 @@ Replay mode loads previously validated structured extraction fixtures. A future 
 
 ## Branding
 
-Temporary branding is centralized in `domain/brand.ts`. Change the name, logo mark, accent tokens, and report metadata there without modifying domain logic. Do not add insurer logos or imply endorsement without permission.
+Branding is centralized in `domain/brand.ts`. The default is SMETECH with the S mark. Change the name, logo mark, accent tokens, and report metadata there without modifying domain logic. Legacy NEXT_PUBLIC_PRODUCT_WORDMARK environment variables are ignored. Do not add insurer logos or imply endorsement without permission.

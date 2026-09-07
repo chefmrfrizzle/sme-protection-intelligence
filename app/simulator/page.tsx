@@ -26,9 +26,9 @@ export default function SimulatorPage() {
   return (
     <div className="page-stack">
       <PageHeader
-        eyebrow="Scenario simulator"
-        title="Explore a business change"
-        description="Select one or more synthetic changes to see what may need review. Select a change again to remove it."
+        eyebrow="Hypothetical enterprise changes"
+        title="Scenario Impact"
+        description="Select synthetic enterprise changes to explore their impact on Protection. Select again to remove a change. Financial health, financing and trade are not assessed."
       />
       <div className="simulator-banner">
         <Play size={17} />
@@ -85,7 +85,7 @@ export default function SimulatorPage() {
       <section className="simulator-results">
         <div className="section-heading">
           <div>
-            <p className="eyebrow">Scenario result</p>
+            <p className="eyebrow">Protection impact</p>
             <h2>
               {assessment.findings.length
                 ? `${assessment.findings.length} ${assessment.findings.length === 1 ? "item" : "items"} to review`

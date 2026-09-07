@@ -2,7 +2,7 @@
 
 ## Goal
 
-[PRODUCT] continuously reconciles a versioned representation of business reality against supplied insurance evidence. The demonstration is a deterministic, replayable decision-support application. It does not make coverage determinations.
+SMETECH continuously reconciles a versioned representation of business reality against supplied insurance evidence. The demonstration is a deterministic, replayable decision-support application. It does not make coverage determinations.
 
 ## Runtime shape
 

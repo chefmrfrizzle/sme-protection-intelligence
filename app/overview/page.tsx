@@ -16,6 +16,7 @@ import { PageHeader } from "@/components/page-header";
 import { ProtectionDiff } from "@/components/protection-diff";
 import { useDemo } from "@/components/demo-provider";
 import { ViewLens } from "@/components/view-lens";
+import { brand } from "@/domain/brand";
 import { demoCompany } from "@/demo/company";
 
 export default function OverviewPage() {
@@ -47,7 +48,7 @@ export default function OverviewPage() {
   return (
     <div className="page-stack">
       <PageHeader
-        eyebrow="Enterprise Risk Passport"
+        eyebrow={brand.productName}
         title={demoCompany.name}
         description={`Last reconciled: ${new Date(
           assessment.snapshotAt,
@@ -67,9 +68,10 @@ export default function OverviewPage() {
       />
 
       <p className="page-description">
-        An evidence-backed view of business changes and protection review needs.
-        Protection is the first module. Financial health, financing and trade
-        are not assessed in this synthetic demonstration.
+        {brand.wordmark} is an evidence-backed {brand.productName}. It connects
+        business changes, evidence and protection review needs. Protection is
+        the first module. Financial health, financing and trade are not assessed
+        in this synthetic demonstration.
       </p>
 
       <section className="hero-grid" aria-label="Protection summary">
@@ -78,11 +80,7 @@ export default function OverviewPage() {
             <p className="eyebrow">Protection Alignment</p>
             <h2>{assessment.alignment}% evidence-aligned</h2>
             <p>{alignmentCopy}</p>
-            <p>
-              Evidence alignment is not a risk rating or confirmation of
-              coverage. A fully aligned business can still have significant
-              risks.
-            </p>
+            <p>{brand.alignmentDisclaimer}</p>
             <details className="methodology-details">
               <summary>
                 <Info aria-hidden="true" size={14} />

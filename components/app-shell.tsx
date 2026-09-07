@@ -27,14 +27,14 @@ const primaryNavigation = [
   { href: "/changes", label: "Changes", icon: Activity },
   { href: "/protection", label: "Protection", icon: ShieldCheck },
   { href: "/evidence", label: "Evidence", icon: Files },
-  { href: "/review-case", label: "Review case", icon: ClipboardCheck },
+  { href: "/review-case", label: "Review", icon: ClipboardCheck },
   { href: "/reports", label: "Reports", icon: FileOutput },
 ] as const;
 
 const secondaryNavigation = [
-  { href: "/controls", label: "Control centre", icon: Cog },
-  { href: "/simulator", label: "Scenario simulator", icon: FlaskConical },
-  { href: "/audit", label: "View audit trail", icon: History },
+  { href: "/controls", label: "Controls", icon: Cog },
+  { href: "/simulator", label: "Scenario Impact", icon: FlaskConical },
+  { href: "/audit", label: "Audit", icon: History },
 ] as const;
 
 function NavLink({
@@ -78,7 +78,7 @@ function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
         </span>
         <div>
           <strong>{brand.wordmark}</strong>
-          <span>Protection intelligence</span>
+          <span>{brand.productName}</span>
         </div>
       </div>
       <div className="synthetic-pill">

@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { brand } from "@/domain/brand";
 import { ArrowRight, CheckCircle2, Info } from "lucide-react";
 import { AlignmentRing } from "@/components/alignment-ring";
 import { DomainCard, domainName } from "@/components/domain-card";
@@ -49,10 +50,7 @@ export default function ProtectionPage() {
         </div>
         <div className="method-note">
           <Info size={17} />
-          <span>
-            Evidence alignment is not a risk rating or confirmation of coverage.
-            It does not predict a claim decision.
-          </span>
+          <span>{brand.alignmentDisclaimer}</span>
         </div>
       </section>
       <div className="domain-grid">

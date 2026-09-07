@@ -1,5 +1,6 @@
 "use client";
 
+import { reviewStatusLabel } from "@/domain/report/review-status";
 import Link from "next/link";
 import {
   ArrowRight,
@@ -38,11 +39,12 @@ export default function ReviewCasePage() {
         <span className="empty-icon">
           <FileCheck2 size={20} />
         </span>
-        <h1>No review required for the evaluated baseline</h1>
+        <h1>No review required</h1>
         <p>
-          Your current operating profile and supplied evidence are aligned
-          within the evaluated scope. Run the synthetic warehouse example to see
-          a discrepancy detected and a professional review case created.
+          Current supplied evidence and operating state are aligned within the
+          scope of this synthetic assessment. Run the synthetic warehouse
+          example to see a discrepancy detected and a professional review case
+          created.
         </p>
         <button
           className="button primary"
@@ -160,7 +162,7 @@ export default function ReviewCasePage() {
                   </div>
                   <div>
                     <small>Human review</small>
-                    <strong>{finding.reviewStatus.replaceAll("_", " ")}</strong>
+                    <strong>{reviewStatusLabel(finding.reviewStatus)}</strong>
                   </div>
                 </div>
                 {finding.missingEvidence.length ? (
