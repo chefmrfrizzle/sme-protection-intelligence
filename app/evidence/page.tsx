@@ -114,8 +114,7 @@ export default function EvidencePage() {
               <div className="provenance-strip">
                 <span>
                   <Hash size={13} />
-                  {lens === "simple" ? "File fingerprint" : "Source hash"}:{" "}
-                  {artifact.sourceHash}
+                  Synthetic content SHA-256: <code>{artifact.sourceHash}</code>
                 </span>
                 <span>Version {artifact.version}</span>
                 <span>
@@ -132,6 +131,12 @@ export default function EvidencePage() {
                       : "Replay validated · parser 1.3.0"}
                 </span>
               </div>
+              <p>
+                This digest covers the synthetic record and source excerpts, not
+                an original PDF or spreadsheet file. The register contains all
+                demo scenarios; listed excerpts are not necessarily used in the
+                selected assessment.
+              </p>
               {artifact.pages.map((page) => (
                 <article className="source-page" key={page.page}>
                   <div>
@@ -142,7 +147,7 @@ export default function EvidencePage() {
                   <span className="source-grounded">
                     <Link2 size={13} />
                     {lens === "simple"
-                      ? "Used in assessment"
+                      ? "Available demo excerpt"
                       : lens === "insurance"
                         ? "Relevant evidence"
                         : "Source-grounded excerpt"}

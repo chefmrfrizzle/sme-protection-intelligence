@@ -101,6 +101,7 @@ in [AGENTS.md](AGENTS.md).
 - `zod`: validated domain, event, agent, and API boundaries;
 - `lucide-react`: accessible interface icons;
 - `pdf-lib`: deterministic server-side PDF generation without a browser service;
+- `@noble/hashes`: synchronous SHA-256 for matching browser and server demo receipts;
 - `@supabase/supabase-js`, `@supabase/ssr`: passwordless sign-in and secure
   server-session cookies;
 - `postgres`: small server-only PostgreSQL driver for transactional persistence;
@@ -113,6 +114,17 @@ No analytics, model call, identity, or database session is required by the
 public demonstration. Supabase is used only by the optional signed-in workspace.
 
 ## Security and privacy boundary
+
+New replay assessments, review cases and audit receipts use canonical JSON encoded
+as UTF-8 and SHA-256, matching the server receipt implementation. The synthetic
+evidence register hashes its structured records and excerpts, not nonexistent
+original PDF/XLSX bytes. Historical stored FNV receipts are not rewritten or
+represented as SHA-256; replaying the fixture with this release produces a new
+digest. A digest alone does not establish trusted authorship or durable history.
+
+The Overview introduces the Enterprise Risk Passport direction while retaining
+Protection as the evaluated module. Financial health, financing and trade are
+explicitly not assessed. Existing rules and alignment calculations are unchanged.
 
 - Synthetic data only; no real SME or insurer information.
 - `.env*`, `.vercel`, secrets, tokens, private source documents, build output, and local reports are ignored.

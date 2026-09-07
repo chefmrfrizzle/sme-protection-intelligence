@@ -435,8 +435,14 @@ export async function createAssessmentPdf(
     "Evidence Register",
     "Source provenance",
   );
+  context = paragraph(
+    context,
+    assessment,
+    "SHA-256 digests below cover synthetic records and source excerpts, not original file bytes. This register includes all demo scenarios; an entry does not imply use in the selected assessment.",
+    { size: 8, gap: 8 },
+  );
   for (const artifact of evidenceArtifacts) {
-    context = ensure(context, assessment, 34);
+    context = ensure(context, assessment, 40);
     context.page.drawText(artifact.title, {
       x: PAGE.margin,
       y: context.y,
@@ -444,14 +450,13 @@ export async function createAssessmentPdf(
       font: bold,
       color: colors.ink,
     });
-    context.page.drawText(`v${artifact.version} | ${artifact.sourceHash}`, {
-      x: PAGE.margin + 230,
-      y: context.y,
-      size: 7,
-      font: regular,
-      color: colors.muted,
-    });
     context.y -= 14;
+    context = paragraph(
+      context,
+      assessment,
+      `v${artifact.version} | ${artifact.sourceHash}`,
+      { size: 7, gap: 2 },
+    );
   }
   context.y -= 10;
 

@@ -50,9 +50,8 @@ export default function ProtectionPage() {
         <div className="method-note">
           <Info size={17} />
           <span>
-            {lens === "simple"
-              ? "This does not confirm coverage or predict a claim decision."
-              : "Not an underwriting, loss, pricing, claim, credit, or insurer risk score."}
+            Evidence alignment is not a risk rating or confirmation of coverage.
+            It does not predict a claim decision.
           </span>
         </div>
       </section>

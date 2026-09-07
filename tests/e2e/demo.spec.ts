@@ -1,4 +1,71 @@
 import { expect, test } from "@playwright/test";
+import { readFile } from "node:fs/promises";
+import { PDFDocument } from "pdf-lib";
+
+test("passport guidance, one-click review and three PDF states work", async ({
+  page,
+}) => {
+  await page.goto("/overview");
+  await expect(
+    page.getByText("Enterprise Risk Passport", { exact: true }),
+  ).toBeVisible();
+  for (const lens of ["Simple", "Insurance", "Evidence"]) {
+    await page.getByRole("tab", { name: lens, exact: true }).click();
+    await expect(
+      page.getByText(/Evidence alignment is not a risk rating/),
+    ).toBeVisible();
+  }
+  for (const [state, version] of [
+    ["baseline", 1],
+    ["warehouse", 2],
+    ["all", 6],
+  ] as const) {
+    if (state === "warehouse") {
+      await page.goto("/review-case");
+      await expect(
+        page.getByRole("heading", {
+          name: "No review required for the evaluated baseline",
+        }),
+      ).toBeVisible();
+      await page.getByRole("button", { name: "Run example change" }).click();
+      await expect(
+        page.getByRole("heading", { name: "Protection Review Case" }),
+      ).toBeVisible();
+    }
+    if (state === "all") {
+      await page.goto("/changes");
+      await page.getByRole("button", { name: "Run full storyline" }).click();
+    }
+    await page.goto("/reports");
+    const pending = page.waitForEvent("download");
+    await page.getByTestId("download-report").click();
+    const download = await pending;
+    expect(await download.failure()).toBeNull();
+    expect(download.suggestedFilename()).toContain(
+      `assessment_v${version}.pdf`,
+    );
+    const bytes = await readFile((await download.path())!);
+    const pdf = await PDFDocument.load(bytes);
+    expect(pdf.getPageCount()).toBeGreaterThanOrEqual(3);
+  }
+  await page.goto("/evidence");
+  await page.locator(".evidence-document summary").first().click();
+  await expect(
+    page.getByText(/This digest covers the synthetic record/).first(),
+  ).toBeVisible();
+  expect(
+    await page.locator(".provenance-strip code").first().textContent(),
+  ).toMatch(/^sha256-[a-f0-9]{64}$/);
+  await page.goto("/overview");
+  await page
+    .getByRole("main")
+    .getByRole("button", { name: "Reset demo" })
+    .click();
+  await page.goto("/review-case");
+  await expect(
+    page.getByRole("button", { name: "Run example change" }),
+  ).toBeVisible();
+});
 
 test("reset-to-report storyline is deterministic and reviewable", async ({
   page,

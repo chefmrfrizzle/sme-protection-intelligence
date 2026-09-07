@@ -1,3 +1,6 @@
+import { sha256 } from "@noble/hashes/sha2.js";
+import { bytesToHex } from "@noble/hashes/utils.js";
+
 function canonicalize(value: unknown): unknown {
   if (Array.isArray(value)) return value.map(canonicalize);
   if (value && typeof value === "object") {
@@ -15,12 +18,8 @@ export function stableStringify(value: unknown): string {
 }
 
 export function demoHash(value: unknown): string {
-  const input = stableStringify(value);
-  let hash = 0xcbf29ce484222325n;
-  const prime = 0x100000001b3n;
-  for (let index = 0; index < input.length; index += 1) {
-    hash ^= BigInt(input.charCodeAt(index));
-    hash = BigInt.asUintN(64, hash * prime);
-  }
-  return `fnv1a64-${hash.toString(16).padStart(16, "0")}`;
+  // Synchronous in both React rendering and server reconciliation. The input
+  // encoding matches the server's node:crypto receiptHash implementation.
+  const input = new TextEncoder().encode(stableStringify(value));
+  return `sha256-${bytesToHex(sha256(input))}`;
 }

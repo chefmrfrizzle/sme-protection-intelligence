@@ -1701,6 +1701,12 @@ p {
   display: inline-flex;
   align-items: center;
   gap: 4px;
+  min-width: 0;
+  flex-wrap: wrap;
+}
+
+.provenance-strip code {
+  overflow-wrap: anywhere;
 }
 
 .source-page {

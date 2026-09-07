@@ -25,7 +25,7 @@ const actionLabels = {
 } as const;
 
 export default function ReviewCasePage() {
-  const { assessment } = useDemo();
+  const { assessment, applyEvent } = useDemo();
   const reviewCase = buildProtectionReviewCase(
     assessment,
     demoEvents,
@@ -38,14 +38,19 @@ export default function ReviewCasePage() {
         <span className="empty-icon">
           <FileCheck2 size={20} />
         </span>
-        <h1>No review case yet</h1>
+        <h1>No review required for the evaluated baseline</h1>
         <p>
-          Apply a synthetic operating change first. A review case is created
-          only from the validated assessment state.
+          Your current operating profile and supplied evidence are aligned
+          within the evaluated scope. Run the synthetic warehouse example to see
+          a discrepancy detected and a professional review case created.
         </p>
-        <Link className="button primary" href="/changes">
-          Open synthetic changes <ArrowRight size={15} />
-        </Link>
+        <button
+          className="button primary"
+          type="button"
+          onClick={() => applyEvent("event_new_warehouse")}
+        >
+          Run example change <ArrowRight aria-hidden="true" size={15} />
+        </button>
       </div>
     );
   }
