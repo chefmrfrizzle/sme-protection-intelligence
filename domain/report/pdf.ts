@@ -1,3 +1,4 @@
+import { reviewStatusLabel } from "@/domain/report/review-status";
 import { createHash } from "node:crypto";
 import { PDFDocument, PDFFont, PDFPage, StandardFonts, rgb } from "pdf-lib";
 import type { Assessment, Finding } from "../types";
@@ -287,7 +288,7 @@ export async function createAssessmentPdf(
   context = paragraph(
     context,
     assessment,
-    `${assessment.appliedEventIds.length} material operating changes have occurred since the baseline assessment. ${potentialGaps} potential protection gap has been identified, ${reviewItems} exposure items require review, and ${incomplete} assessment remains incomplete because supporting evidence was not available.`,
+    `Material operating changes since baseline: ${assessment.appliedEventIds.length}. Potential protection gaps identified: ${potentialGaps}. Exposure items requiring review: ${reviewItems}. Items with incomplete supporting evidence: ${incomplete}.`,
     { size: 11, gap: 18 },
   );
 
@@ -361,7 +362,7 @@ export async function createAssessmentPdf(
   context = paragraph(
     context,
     assessment,
-    "The alignment indicator is deterministic evidence completeness and alignment across evaluated domains. It is not an underwriting score, probability of loss, claim outcome, pricing indication, credit score, or insurer risk rating.",
+    `The alignment indicator measures deterministic evidence completeness and alignment across evaluated domains. ${brand.alignmentDisclaimer}`,
     { size: 8.5, color: colors.muted },
   );
 
@@ -480,17 +481,17 @@ export async function createAssessmentPdf(
       ? assessment.findings
           .map(
             (finding) =>
-              `${finding.title}: ${finding.reviewStatus.replaceAll("_", " ")}`,
+              `${finding.title}: ${reviewStatusLabel(finding.reviewStatus)}`,
           )
           .join(". ")
-      : "No open finding requires professional disposition in the baseline assessment.",
+      : "Not required. No finding requires professional disposition within this synthetic assessment scope.",
   );
 
   context = heading(context, assessment, "Limitations");
   context = paragraph(
     context,
     assessment,
-    "This report uses synthetic data and selected synthetic evidence only. Findings are decision-support outputs and do not constitute coverage determinations. Confirmation should be obtained from the appropriate insurer, broker, or professional adviser. Complete wording, schedules, endorsements, facts, law, and circumstances may affect any professional interpretation.",
+    "Resolved refers only to the review workflow, not a coverage decision or removal of a protection finding. This report uses synthetic data and selected synthetic evidence only. Findings are decision-support outputs and do not constitute coverage determinations. Confirmation should be obtained from the appropriate insurer, broker, or professional adviser. Complete wording, schedules, endorsements, facts, law, and circumstances may affect any professional interpretation.",
     { size: 8.5 },
   );
 

@@ -1,5 +1,6 @@
 "use client";
 
+import { reviewStatusLabel } from "@/domain/report/review-status";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useState } from "react";
@@ -263,7 +264,7 @@ export default function FindingDetailPage() {
           <dl>
             <div>
               <dt>Status</dt>
-              <dd>{finding.reviewStatus.replaceAll("_", " ")}</dd>
+              <dd>{reviewStatusLabel(finding.reviewStatus)}</dd>
             </div>
             <div>
               <dt>Owner</dt>

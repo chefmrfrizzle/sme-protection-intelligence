@@ -7,7 +7,9 @@ test("passport guidance, one-click review and three PDF states work", async ({
 }) => {
   await page.goto("/overview");
   await expect(
-    page.getByText("Enterprise Risk Passport", { exact: true }),
+    page
+      .getByRole("main")
+      .getByText("Enterprise Risk Passport", { exact: true }),
   ).toBeVisible();
   for (const lens of ["Simple", "Insurance", "Evidence"]) {
     await page.getByRole("tab", { name: lens, exact: true }).click();
@@ -24,7 +26,7 @@ test("passport guidance, one-click review and three PDF states work", async ({
       await page.goto("/review-case");
       await expect(
         page.getByRole("heading", {
-          name: "No review required for the evaluated baseline",
+          name: "No review required",
         }),
       ).toBeVisible();
       await page.getByRole("button", { name: "Run example change" }).click();
@@ -37,6 +39,11 @@ test("passport guidance, one-click review and three PDF states work", async ({
       await page.getByRole("button", { name: "Run full storyline" }).click();
     }
     await page.goto("/reports");
+    if (state === "baseline")
+      await expect(
+        page.getByText("Not required", { exact: true }),
+      ).toBeVisible();
+    else await expect(page.getByText("OPEN", { exact: true })).toBeVisible();
     const pending = page.waitForEvent("download");
     await page.getByTestId("download-report").click();
     const download = await pending;
@@ -132,7 +139,7 @@ test("reset-to-report storyline is deterministic and reviewable", async ({
 
   await page.getByTestId("request-review").first().click();
   await expect(
-    page.getByText("REVIEWING", { exact: true }).first(),
+    page.getByText("UNDER REVIEW", { exact: true }).first(),
   ).toBeVisible();
   await page.getByRole("link", { name: "Open review case" }).click();
   await expect(
@@ -161,7 +168,7 @@ test("reset-to-report storyline is deterministic and reviewable", async ({
   await page.getByTestId("download-report").first().click();
   const download = await downloadPromise;
   expect(download.suggestedFilename()).toMatch(
-    /PRODUCT_Protection_Alignment_assessment_v3\.pdf/,
+    /SMETECH_Protection_Alignment_assessment_v3\.pdf/,
   );
 
   await page.goto("/audit");
@@ -327,4 +334,45 @@ test("control centre explains readiness without making live or coverage claims",
     page.getByText("Make an insurance or legal decision").first(),
   ).toBeVisible();
   await expect(page.getByText("BN-08").first()).toBeVisible();
+});
+
+test("public navigation has consistent branding and fits desktop and mobile", async ({
+  page,
+}, testInfo) => {
+  const errors: string[] = [];
+  page.on("pageerror", (error) => errors.push(error.message));
+  page.on("console", (message) => {
+    if (message.type() === "error") errors.push(message.text());
+  });
+  await page.goto("/overview");
+  for (const [label, route] of [
+    ["Overview", "/overview"],
+    ["Changes", "/changes"],
+    ["Protection", "/protection"],
+    ["Evidence", "/evidence"],
+    ["Review", "/review-case"],
+    ["Reports", "/reports"],
+    ["Controls", "/controls"],
+    ["Scenario Impact", "/simulator"],
+    ["Audit", "/audit"],
+  ]) {
+    if ((page.viewportSize()?.width ?? 0) <= 820)
+      await page.getByRole("button", { name: "Open navigation" }).click();
+    await page.getByRole("link", { name: label, exact: true }).click();
+    await expect(page).toHaveURL(new RegExp(route + "$"));
+    await expect(page.locator("h1")).toBeVisible();
+    await expect(page).toHaveTitle(/SMETECH/);
+    await expect(page.locator("body")).not.toContainText("[PRODUCT]");
+    expect(
+      await page.evaluate(
+        () => document.documentElement.scrollWidth <= window.innerWidth + 1,
+      ),
+    ).toBe(true);
+    if (["/overview", "/review-case", "/reports", "/simulator"].includes(route))
+      await page.screenshot({
+        path: testInfo.outputPath(`${route.slice(1)}.png`),
+        fullPage: true,
+      });
+  }
+  expect(errors).toEqual([]);
 });

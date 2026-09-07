@@ -1,6 +1,9 @@
 export const brand = {
-  wordmark: process.env.NEXT_PUBLIC_PRODUCT_WORDMARK || "[PRODUCT]",
-  mark: "P",
+  wordmark: "SMETECH",
+  mark: "S",
+  productName: "Enterprise Risk Passport",
+  alignmentDisclaimer:
+    "Evidence alignment is not a risk rating, a credit score, a confirmation of coverage, a claim prediction or an underwriting decision. A fully aligned business can still have significant risks.",
   reportTitle: "SME Protection Alignment Report",
   accent: "#0f766e",
   accentDark: "#115e59",

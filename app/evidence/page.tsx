@@ -51,7 +51,7 @@ export default function EvidencePage() {
   return (
     <div className="page-stack">
       <PageHeader
-        eyebrow="Evidence register"
+        eyebrow="Enterprise Evidence Graph"
         title="Evidence"
         description={
           lens === "simple"

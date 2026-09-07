@@ -18,11 +18,11 @@ export default function ChangesPage() {
   return (
     <div className="page-stack">
       <PageHeader
-        eyebrow="Business change timeline"
+        eyebrow="Enterprise Event Ledger"
         title="Changes"
         description={
           lens === "simple"
-            ? "See what changed in the business and whether anything needs attention."
+            ? "Reusable enterprise events record what changed in the business. The current Protection module evaluates their impact against supplied evidence."
             : lens === "insurance"
               ? "Material operating changes reconciled against the supplied protection evidence."
               : "Each change is linked to its source records, rule result and assessment version."

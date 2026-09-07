@@ -58,7 +58,7 @@ const controls = [
     icon: Fingerprint,
     status: "MAPPING-READY",
     explanation:
-      "Production-oriented receipts use canonical SHA-256 inputs, and material database records have append-only enforcement in the migration design.",
+      "Current replay and server receipts use canonical SHA-256 inputs; historical legacy receipts retain their original algorithm, and material database records have append-only enforcement in the migration design.",
   },
   {
     id: "BN-07",

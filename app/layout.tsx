@@ -5,9 +5,9 @@ import { DemoProvider } from "@/components/demo-provider";
 import { brand } from "@/domain/brand";
 
 export const metadata: Metadata = {
-  title: `${brand.wordmark} | SME Protection Intelligence`,
+  title: `${brand.wordmark} | ${brand.productName}`,
   description:
-    "Synthetic demonstration of continuous exposure-to-protection reconciliation for growing SMEs.",
+    "Synthetic, evidence-first Enterprise Risk Passport. Protection is the first implemented module.",
   robots: { index: false, follow: false },
 };
 

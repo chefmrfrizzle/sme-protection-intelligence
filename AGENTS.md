@@ -1,4 +1,4 @@
-# [PRODUCT] Engineering Rules
+# SMETECH Engineering Rules
 
 This repository implements a synthetic-data demonstration of an SME protection-intelligence platform. These rules apply to every change.
 

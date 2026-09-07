@@ -12,6 +12,7 @@ import { PageHeader } from "@/components/page-header";
 import { StatusBadge } from "@/components/status-badge";
 import { useDemo } from "@/components/demo-provider";
 import { ViewLens } from "@/components/view-lens";
+import { reportReviewStatus } from "@/domain/report/review-status";
 import { brand } from "@/domain/brand";
 
 export default function ReportsPage() {
@@ -88,6 +89,7 @@ export default function ReportsPage() {
             <p className="eyebrow">{reportCopy.summaryLabel}</p>
             <h2>{reportCopy.summaryTitle}</h2>
             <p>{reportCopy.summary}</p>
+            <p>{brand.alignmentDisclaimer}</p>
             <div className="report-alignment">
               <strong>{assessment.alignment}%</strong>
               <span>
@@ -225,13 +227,7 @@ export default function ReportsPage() {
               <strong>
                 {lens === "simple" ? "Review status" : "Human review"}
               </strong>
-              <span>
-                {assessment.findings.some(
-                  (finding) => finding.reviewStatus !== "OPEN",
-                )
-                  ? "In progress"
-                  : "Open / unassigned"}
-              </span>
+              <span>{reportReviewStatus(assessment.findings)}</span>
             </div>
           </div>
         </aside>
